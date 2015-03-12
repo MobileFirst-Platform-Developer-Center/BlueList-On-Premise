@@ -11,11 +11,15 @@ import android.widget.Toast;
  */
 public class SplashActivity extends Activity {
 
+    Activity splash;
+
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         // set the content view for your splash screen you defined in an xml file
         setContentView(R.layout.activity_launch_screen);
+
+        splash = this;
 
         // perform other stuff you need to do
 
@@ -25,24 +29,25 @@ public class SplashActivity extends Activity {
     }
 
     private class AsyncLoadDataManager extends AsyncTask<Void, Void, Void> {
+
         @Override
         protected void onPreExecute(){
             // show your progress dialog
-            Toast.makeText(getBaseContext(), "LOADING DATA", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), "LOADING DATA", Toast.LENGTH_SHORT).show();
 
         }
 
         @Override
         protected Void doInBackground(Void... voids){
             // load your xml feed asynchronously
-            DataStoreManager.getInstance(getApplicationContext());
+            DataStoreManager.getInstance(getApplicationContext(), splash);
             //Toast.makeText(getBaseContext(), "WORKING", Toast.LENGTH_LONG).show();
             return null;
         }
 
         @Override
         protected void onPostExecute(Void params){
-            Toast.makeText(getBaseContext(), "DONE", Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), "DONE LOADING", Toast.LENGTH_SHORT).show();
             // dismiss your dialog
             // launch the Main activity
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);

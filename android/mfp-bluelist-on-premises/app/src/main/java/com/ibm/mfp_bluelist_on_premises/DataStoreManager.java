@@ -1,8 +1,10 @@
 package com.ibm.mfp_bluelist_on_premises;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.cloudant.sync.notifications.ReplicationCompleted;
 import com.cloudant.sync.notifications.ReplicationErrored;
@@ -77,21 +79,34 @@ public class DataStoreManager {
     DataManager manager;
     WLClient client;
     SampleChallengeHandler sampleChallengeHandler;
+    Context context;
+    Activity activity;
 
     // Should I make the user supply a context everytime they want to call this?
-    public static DataStoreManager getInstance(Context context) {
+    public static DataStoreManager getInstance(Context context, Activity activity) {
         if(instance == null) {
-            instance = new DataStoreManager(context);
+            instance = new DataStoreManager(context, activity);
         }
         return instance;
     }
 
-    protected DataStoreManager(Context context){
+    public void setContext(Context context){
+        this.context = context;
+    }
+
+    public void setActivity(Activity activity){
+        this.activity = activity;
+    }
+
+    protected DataStoreManager(Context context, Activity activity){
 
         itemList = new ArrayList<Item>();
 
+        this.activity = activity;
+
+        this.context = context;
+
         Properties props = new java.util.Properties();
-        //Context context = getApplicationContext();
         try {
             AssetManager assetManager = context.getAssets();
             props.load(assetManager.open(PROPS_FILE));
@@ -217,7 +232,10 @@ public class DataStoreManager {
             Log.e(CLASS_NAME, "Error creating index", t.getError());
         }
 
-        sync(true);  // 'true': wait for DBs to synchronize
+        doPullReplication(true);
+
+        setItemList();
+
     }
     public Store getStore() {
         return localStore;
@@ -289,14 +307,20 @@ public class DataStoreManager {
         });
     }
 
-    private boolean doPullReplication(boolean waitForSync) {
+    public boolean doPullReplication(boolean waitForSync) {
         try{
-            //Toast.makeText(MainActivity.this, "Pulling Items From Cloudant", Toast.LENGTH_SHORT).show();
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "Pulling Items from Cloudant remote", Toast.LENGTH_SHORT).show();
+                }
+            });
+
             // create one-way replication task
             Task<PullReplication> pullTask = manager.pullReplicationForStore(DBName);
             pullTask.waitForCompletion();
             if (pullTask.isFaulted()){
-                //Toast.makeText(MainActivity.this, "Pull replication error: "+ pullTask.getError(), Toast.LENGTH_LONG).show();
+
                 Log.e(CLASS_NAME, "Pull replication error", pullTask.getError());
                 return false;
             }
@@ -313,7 +337,7 @@ public class DataStoreManager {
                     latch.await();
                     replicator.getEventBus().unregister(listener);
                     if (replicator.getState() != Replicator.State.COMPLETE) {
-                        //Toast.makeText(MainActivity.this, "Pull replication error: "+ listener.error.toString(), Toast.LENGTH_LONG).show();
+
                         Log.e(CLASS_NAME, "Pull replication failed.  Error replicating to local.");
                         Log.e(CLASS_NAME, listener.error.toString());
                     }
@@ -323,7 +347,14 @@ public class DataStoreManager {
                 }
             }
         } catch (Exception e) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "Error replicating with Cloudant", Toast.LENGTH_SHORT).show();
+                }
+            });
             // replication failed
+
             Log.e(CLASS_NAME, "Pull replication error", e);
             return false;
         }
@@ -332,13 +363,20 @@ public class DataStoreManager {
 
     private boolean doPushReplication(boolean waitForSync) {
         try{
-            //Toast.makeText(MainActivity.this, "Pushing Items to Cloudant", Toast.LENGTH_SHORT).show();
+
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "Pushing Items to Cloudant remote", Toast.LENGTH_SHORT).show();
+                }
+            });
+
             // create one-way replication task
             Task<PushReplication> pushTask = manager.pushReplicationForStore(DBName);
             pushTask.waitForCompletion();
             if (pushTask.isFaulted()){
                 Log.e(CLASS_NAME, "Push replication error", pushTask.getError());
-                //Toast.makeText(MainActivity.this, "Push replication error: "+ pushTask.getError(), Toast.LENGTH_LONG).show();
+
                 return false;
             }
             else {
@@ -354,16 +392,24 @@ public class DataStoreManager {
                     latch.await();
                     replicator.getEventBus().unregister(listener);
                     if (replicator.getState() != Replicator.State.COMPLETE) {
-                        //Toast.makeText(MainActivity.this, "Push replication error: "+ listener.error.toString(), Toast.LENGTH_LONG).show();
+
                         Log.e(CLASS_NAME, "Push replication failed.  Error replicating to remote.");
                         Log.e(CLASS_NAME, listener.error.toString());
                     }
+                    setItemList();
                 }
                 else {
                     replicator.start();
+                    setItemList();
                 }
             }
         } catch (Exception e) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, "Error replicating with Cloudant", Toast.LENGTH_SHORT).show();
+                }
+            });
             // replication failed
             Log.e(CLASS_NAME, "Push replication error", e);
             return false;
@@ -377,7 +423,6 @@ public class DataStoreManager {
      */
     public void sync(boolean waitForSync) {
         boolean repSuccess = false;
-        //Toast.makeText(MainActivity.this, "Database replication started", Toast.LENGTH_LONG).show();
         Log.i(CLASS_NAME, "Database replication started");
         repSuccess = doPullReplication(waitForSync);
         if (repSuccess){
@@ -386,12 +431,11 @@ public class DataStoreManager {
 
         }
         if (repSuccess) {
-            Log.i(CLASS_NAME, "Database replication completed successfully");
-            //Toast.makeText(MainActivity, "Database replication completed successfully", Toast.LENGTH_SHORT).show();
             setItemList();
+            Log.i(CLASS_NAME, "Database replication completed successfully");
 
         } else {
-            //Toast.makeText(MainActivity.this, "Database replication was not successful", Toast.LENGTH_SHORT).show();
+
             Log.w(CLASS_NAME, "Database replication was not successful");
         }
 
@@ -423,5 +467,4 @@ public class DataStoreManager {
             latch.countDown();
         }
     }
-
 }

@@ -2,6 +2,7 @@ package com.ibm.mfp_bluelist_on_premises;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -15,7 +16,6 @@ import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.cloudant.toolkit.Store;
@@ -33,7 +33,7 @@ import bolts.Task;
  * TODO: Exception is thrown when the priority is tapped 4+ times quickly in a row, store gets out of sync but is able to recover
  * TODO: The actual local store save/delete/edit boltz tasks can be moved to DataStoreManager
  * TODO: Am I able to handle rotation at the moment? Does the DataStoreManager singleton stick around?
- * TODO: Update filter functionality to be more centralized and concise
+ * TODO: Update filter functionality to be more centralized and concise, should change to a model similar to the priority image change
  */
 public class MainActivity extends Activity {
 
@@ -65,6 +65,10 @@ public class MainActivity extends Activity {
             R.mipmap.high,
     };
 
+    private DataStoreManager dsm;
+
+    Activity main;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +96,8 @@ public class MainActivity extends Activity {
 
         swipeLayout.setOnRefreshListener(RefreshListener);
 
+        main = this;
+
         if(savedInstanceState!=null && savedInstanceState.containsKey("allData") && savedInstanceState.containsKey("mediumData") && savedInstanceState.containsKey("highData")){
 
 //            allList = savedInstanceState.getParcelableArrayList("allData");
@@ -116,6 +122,12 @@ public class MainActivity extends Activity {
         }
         else {
 
+            dsm = DataStoreManager.getInstance(getApplicationContext(), main);
+
+            dsm.setActivity(main);
+
+            dsm.setContext(getApplicationContext());
+
             // Initialize priority lists
             mediumList = new ArrayList<Item>();
             highList = new ArrayList<Item>();
@@ -126,7 +138,7 @@ public class MainActivity extends Activity {
             // Set default filter to "All"
             filter = "All";
 
-            allList = DataStoreManager.getInstance(getApplicationContext()).getItemList();
+            allList = dsm.getItemList();
 
             popLists();
 
@@ -142,10 +154,10 @@ public class MainActivity extends Activity {
         @Override
         public void onRefresh() {
             // TODO: Could I make this into a separate thred? another async task? Currently, the spinner freezes for a moment waiting for sync
-            DataStoreManager.getInstance(getApplicationContext()).sync(true);
 
-            DataStoreManager.getInstance(getApplicationContext()).setItemList();
+            new DataBaseSync().execute();
 
+            //TODO: Is this done correctly? Can I do this more accurately?
             new Handler().postDelayed(new Runnable() {
 
                 @Override
@@ -153,10 +165,7 @@ public class MainActivity extends Activity {
 
                     swipeLayout.setRefreshing(false);
                 }
-            }, 3000);
-            allList.clear();
-            allList = DataStoreManager.getInstance(getApplicationContext()).getItemList();
-            popLists();
+            }, 4000);
         }
     };
 
@@ -270,7 +279,7 @@ public class MainActivity extends Activity {
             // Remove the item in the list
             adapterList.remove(position);
 
-            Store todosStore = DataStoreManager.getInstance(getApplicationContext()).getStore();
+            Store todosStore = dsm.getStore();
 
             todosStore.delete(t).continueWith(new Continuation<String, Void>() {
 
@@ -279,24 +288,22 @@ public class MainActivity extends Activity {
                     // Log if the delete was cancelled.
                     if (task.isCancelled()){
                         Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
-                        Toast.makeText(MainActivity.this, "Delete From Local Store was Cancelled", Toast.LENGTH_LONG).show();
 
                     }
 
                     // Log error message, if the delete task fails.
                     else if (task.isFaulted()) {
                         Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
-                        Toast.makeText(MainActivity.this, "Error Deleting From Local Store: "+ task.getError().getMessage(), Toast.LENGTH_LONG).show();
 
                     }
 
                     // If the result succeeds, reload the list.
                     else {
-                        Toast.makeText(MainActivity.this, "Todo Deleted From Local Store", Toast.LENGTH_SHORT).show();
 
-                        DataStoreManager.getInstance(getApplicationContext()).setItemList();
+
+                        dsm.setItemList();
                         //allList.clear();
-                        allList = DataStoreManager.getInstance(getApplicationContext()).getItemList();
+                        dsm.getItemList();
 
                     }
                     return null;
@@ -378,7 +385,7 @@ public class MainActivity extends Activity {
                     allList.add(todoToAdd);
                     adapterList.add(hm);
 
-                    Store todosStore = DataStoreManager.getInstance(getApplicationContext()).getStore();
+                    Store todosStore = dsm.getStore();
 
                     todosStore.save(todoToAdd).continueWith(new Continuation<Object, Void>() {
 
@@ -387,24 +394,22 @@ public class MainActivity extends Activity {
                             // Log if the save was cancelled.
                             if (task.isCancelled()){
                                 Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
-                                Toast.makeText(MainActivity.this, "Todo Creation Was Cancelled", Toast.LENGTH_LONG).show();
 
                             }
                             // Log error message, if the save task fails.
                             else if (task.isFaulted()) {
 
                                 Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
-                                Toast.makeText(MainActivity.this, "Error Saving New Todo in Local Store: " + task.getError().getMessage(), Toast.LENGTH_LONG).show();
 
                             }
 
                             // If the result succeeds, load the list.
                             else {
 
-                                Toast.makeText(MainActivity.this, "Todo Created in Local Store", Toast.LENGTH_SHORT).show();
+
                                 //allList.clear();
-                                DataStoreManager.getInstance(getApplicationContext()).setItemList();
-                                allList = DataStoreManager.getInstance(getApplicationContext()).getItemList();
+                                dsm.setItemList();
+                                allList = dsm.getItemList();
 
                             }
                             return null;
@@ -469,7 +474,7 @@ public class MainActivity extends Activity {
 
                     adapterList.get(pos).put("txt", newText);
 
-                    Store todosStore = DataStoreManager.getInstance(getApplicationContext()).getStore();
+                    Store todosStore = dsm.getStore();
 
                     todosStore.save(allList.get(pos)).continueWith(new Continuation<Object, Void>() {
 
@@ -477,22 +482,21 @@ public class MainActivity extends Activity {
                         public Void then(Task<Object> task) throws Exception {
                             if(task.isCancelled()) {
                                 Log.e(CLASS_NAME, "Exception : " + task.toString() + " was cancelled.");
-                                Toast.makeText(MainActivity.this, "Edit Was Cancelled", Toast.LENGTH_LONG).show();
 
                             }
 
                             else if (task.isFaulted()) {
                                 Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
-                                Toast.makeText(MainActivity.this, "Error Editing Todo in Local Store" + task.getError().getMessage(), Toast.LENGTH_LONG).show();
+
 
                             }
 
                             else {
-                                Toast.makeText(MainActivity.this, "Todo Edited Successfully", Toast.LENGTH_SHORT).show();
+
 
                                 //allList.clear();
-                                DataStoreManager.getInstance(getApplicationContext()).setItemList();
-                                allList = DataStoreManager.getInstance(getApplicationContext()).getItemList();
+                                dsm.setItemList();
+                                allList = dsm.getItemList();
 
                             }
                             return null;
@@ -573,7 +577,7 @@ public class MainActivity extends Activity {
             highList.remove(t);
         }
 
-        Store todosStore = DataStoreManager.getInstance(getApplicationContext()).getStore();
+        Store todosStore = dsm.getStore();
 
         todosStore.save(t).continueWith(new Continuation<Object, Void>() {
 
@@ -581,21 +585,20 @@ public class MainActivity extends Activity {
             public Void then(Task<Object> task) throws Exception {
                 if(task.isCancelled()) {
                     Log.e(CLASS_NAME, "Exception : " + task.toString() + " was cancelled.");
-                    Toast.makeText(MainActivity.this, "Edit Was Cancelled", Toast.LENGTH_LONG).show();
 
                 }
 
                 else if (task.isFaulted()) {
                     Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
-                    Toast.makeText(MainActivity.this, "Error Editing Todo in Local Store" + task.getError().getMessage(), Toast.LENGTH_LONG).show();
+
 
                 }
 
                 else {
-                    Toast.makeText(MainActivity.this, "Todo Edited Successfully", Toast.LENGTH_SHORT).show();
+
                     //allList.clear();
-                    DataStoreManager.getInstance(getApplicationContext()).setItemList();
-                    allList = DataStoreManager.getInstance(getApplicationContext()).getItemList();
+                    dsm.setItemList();
+                    allList = dsm.getItemList();
 
                 }
                 return null;
@@ -610,6 +613,34 @@ public class MainActivity extends Activity {
     }
     public String getFilter(){
         return filter;
+    }
+
+    private class DataBaseSync extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids){
+            // load your xml feed asynchronously
+            dsm.sync(true);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void params) {
+            allList = dsm.getItemList();
+            popLists();
+            if(filter.equals("All")){
+                onToggle(findViewById(R.id.button));
+            }
+            // If medium priority todos are showing, remove from appropriate lists
+            else if(filter.equals("Medium")){
+                onToggle(findViewById(R.id.button2));
+            }
+            // If high todos are showing, remove from appropriate lists
+            else{
+                onToggle(findViewById(R.id.button3));
+            }
+
+        }
     }
 
 }
