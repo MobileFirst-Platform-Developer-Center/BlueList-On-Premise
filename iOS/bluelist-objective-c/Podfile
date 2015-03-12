@@ -1,0 +1,5 @@
+source 'https://hub.jazz.net/git/imflocalsdk/imf-ios-sdk-specs.git'
+source 'https://github.com/CocoaPods/Specs.git'
+
+platform :ios, '7.0'
+pod 'IMFDataLocal'

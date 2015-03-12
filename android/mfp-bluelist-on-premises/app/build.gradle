@@ -1,0 +1,41 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+    defaultConfig {
+        applicationId 'com.ibm.mfp_bluelist_on_premises'
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+    }
+}
+
+repositories {
+    jcenter()
+    mavenLocal()
+    maven {
+        url "http://cloudant.github.io/cloudant-sync-eap/repository/"
+    }
+    mavenCentral()
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    compile fileTree(include: '*.jar', dir: 'libs')
+    compile(name: 'worklight-android-native', ext: 'jar')
+    compile 'com.ibm.mobile.services:imfdata-local:0.1.0-20150219-1231'
+    compile 'com.ibm.mobile.services:cloudant-toolkit-local:0.1.0-20150219-1231'
+    compile 'com.android.support:appcompat-v7:21.0.3'
+}

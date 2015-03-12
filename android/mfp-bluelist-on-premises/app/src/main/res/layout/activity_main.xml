@@ -1,0 +1,105 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/MainActivity"
+    tools:context=".MainActivity"
+    android:background="@color/blue">
+    <LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/linearLayout"
+    android:orientation="vertical"
+        android:weightSum="1">
+
+        <ImageButton
+            android:background="@drawable/button_response"
+            android:contentDescription="PlusButton"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            style="@style/PlusButton"
+            android:id="@+id/action_add_todo"
+            android:onClick="addTodo"
+            android:clickable="true"
+            android:src="@mipmap/plusbutton"
+            android:layout_weight="0.66" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/linearLayout"
+        android:id="@+id/frameLayout2">
+
+        <RadioGroup android:id="@+id/toggleGroup"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:weightSum="1">
+            <ToggleButton
+                style="@style/ToggleButton"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:textOff="@string/all"
+                android:textOn="@string/all"
+                android:id="@+id/button"
+                android:layout_gravity="left|top"
+                android:textStyle="bold"
+                android:checked="true"
+                android:layout_weight="0.333"/>
+
+            <ToggleButton
+                style="@style/ToggleButton"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:textOff="@string/medium"
+                android:textOn="@string/medium"
+                android:id="@+id/button2"
+                android:layout_gravity="center_horizontal|top"
+                android:textStyle="bold"
+                android:layout_weight="0.333"/>
+
+            <ToggleButton
+                style="@style/ToggleButton"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:textOff="@string/high"
+                android:textOn="@string/high"
+                android:id="@+id/button3"
+                android:layout_gravity="right|top"
+                android:textStyle="bold"
+                android:layout_weight="0.333"/>
+        </RadioGroup>
+
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="160dp"
+        android:layout_height="fill_parent"
+        style="@style/BlueListTitleStyle"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/frameLayout2"
+        android:id="@+id/textView" />
+
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/swipe_container"
+        android:layout_below="@+id/frameLayout2">
+        <ListView
+            android:scrollingCache="false"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/listView"
+            android:background="@color/white"
+            android:layout_gravity="center_horizontal|bottom"/>
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+
+</RelativeLayout>

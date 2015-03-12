@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@color/blue"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:weightSum="1">
+
+    <EditText android:id="@+id/todo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:minWidth="400dp"
+        android:textSize="20sp"
+        android:text=""
+        android:hint="New Todo"
+        android:editable="true"
+        android:inputType="text|textAutoCorrect"/>
+
+    <!--<Button android:id="@+id/cancel"
+        style="@style/dialogButtons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:text="Cancel"
+        android:onClick="dismiss"
+        android:layout_below="@+id/todo"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:clickable="true"
+        android:layout_marginRight="20sp"/>-->
+
+    <Button android:id="@+id/Add"
+        style="@style/dialogButtons"
+        android:layout_below="@+id/todo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="40dp"
+        android:text="Done"
+        android:clickable="true" />
+
+</LinearLayout>

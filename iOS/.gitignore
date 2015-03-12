@@ -1,0 +1,23 @@
+# Xcode
+.DS_Store
+*/build/*
+*.pbxuser
+xcuserdata
+*.xcworkspace/
+xcshareddata
+*.xccheckout
+build
+
+#CocoaPods
+Pods
+Podfile.lock
+
+#IMF
+IMFCore.framework
+IMFData.framework
+IMFPush.framework
+IMFFacebookAuthentication.framework
+IMFGoogleAuthentication.framework
+IMFJSONStoreCore.framework
+CloudantToolkit.framework
+
