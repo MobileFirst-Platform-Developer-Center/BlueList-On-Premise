@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -30,10 +31,9 @@ import bolts.Task;
 /**
  * Created by drcariel on 3/12/2015.
  *
- * TODO: Exception is thrown when the priority is tapped 4+ times quickly in a row, store gets out of sync but is able to recover
- * TODO: The actual local store save/delete/edit boltz tasks can be moved to DataStoreManager
+ *
  * TODO: Am I able to handle rotation at the moment? Does the DataStoreManager singleton stick around?
- * TODO: Update filter functionality to be more centralized and concise, should change to a model similar to the priority image change
+ *
  */
 public class MainActivity extends Activity {
 
@@ -42,12 +42,12 @@ public class MainActivity extends Activity {
     // Splash Dialog
     protected Dialog bluemixSplash;
     // Need filter value to know what and where to add items, basically maintains state of list view
-    private String filter;
+    private Integer filter;
     // List of all todo objects
     private ArrayList<Item> allList;
     // Main List View
     private ListView lv;
-
+    // Variable to hold swipe refresh layout
     private SwipeRefreshLayout swipeLayout;
     // List View Adapter for UI list data
     private SimpleAdapter simpleAdapter;
@@ -65,8 +65,16 @@ public class MainActivity extends Activity {
             R.mipmap.high,
     };
 
-    private DataStoreManager dsm;
+    private int[] filters = new int[]{
+            R.id.button,
+            R.id.button2,
+            R.id.button3,
+    };
 
+    private SparseArray<ArrayList<Item>> filterLists;
+    // Data Store Manager singleton to manipulate local store and get updated lists
+    private DataStoreManager dsm;
+    // Need to save activity to pass to DataStore Manager so Toasts can be called at appropriate times
     Activity main;
 
     @Override
@@ -91,9 +99,9 @@ public class MainActivity extends Activity {
         lv.setOnItemLongClickListener(deleteListener);
         // Create radio/toggle tabs above the list View for filtering
         ((RadioGroup) findViewById(R.id.toggleGroup)).setOnCheckedChangeListener(ToggleListener);
-
+        // Grab Swiperefresh Layout
         swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
-
+        // Set swipe refresh listener for sync on pulldown of the list
         swipeLayout.setOnRefreshListener(RefreshListener);
 
         main = this;
@@ -105,20 +113,9 @@ public class MainActivity extends Activity {
 //            highList = savedInstanceState.getParcelableArrayList("highData");
 
             // Set filter to currently selected tab
-            filter = savedInstanceState.getCharSequence("filter").toString();
+            filter = savedInstanceState.getInt("filter");
 
-            // TODO: Need to create filter method to populate list visually
-            if(filter.equals("All")){
-                onToggle(findViewById(R.id.button));
-            }
-
-            if(filter.equals("Medium")){
-                onToggle(findViewById(R.id.button2));
-            }
-
-            if(filter.equals("High")){
-                onToggle(findViewById(R.id.button3));
-            }
+            popLists();
         }
         else {
 
@@ -135,26 +132,32 @@ public class MainActivity extends Activity {
             // Initialize all list
             allList = new ArrayList<Item>();
 
-            // Set default filter to "All"
-            filter = "All";
+            filterLists = new SparseArray<ArrayList<Item>>();
 
-            allList = dsm.getItemList();
+            filterLists.append(1, allList);
+            filterLists.append(2, mediumList);
+            filterLists.append(3, highList);
+
+            // Set default filter to "All"
+            filter = 1;
+
+            allList.addAll(dsm.getItemList());
 
             popLists();
 
-            onToggle(findViewById(R.id.button));
-
-
         }
 
+    }
+
+
+    private void filterChange(){
+        onToggle(findViewById(filters[filter-1]));
     }
 
     private SwipeRefreshLayout.OnRefreshListener RefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
 
         @Override
         public void onRefresh() {
-            // TODO: Could I make this into a separate thred? another async task? Currently, the spinner freezes for a moment waiting for sync
-
             new DataBaseSync().execute();
 
             //TODO: Is this done correctly? Can I do this more accurately?
@@ -165,7 +168,7 @@ public class MainActivity extends Activity {
 
                     swipeLayout.setRefreshing(false);
                 }
-            }, 4000);
+            }, 4500);
         }
     };
 
@@ -176,7 +179,7 @@ public class MainActivity extends Activity {
 //        savedInstanceState.putParcelableArrayList("mediumData", mediumList);
 //        savedInstanceState.putParcelableArrayList("highData", highList);
 
-        savedInstanceState.putCharSequence("filter", filter);
+        savedInstanceState.putInt("filter", filter);
 
         super.onSaveInstanceState(savedInstanceState);
 
@@ -191,11 +194,13 @@ public class MainActivity extends Activity {
         ((RadioGroup)view.getParent()).check(view.getId());
         // Grab text from the button to filter appropriately
         TextView tv = (TextView) view;
-        filter = tv.getText().toString();
+        String tab = tv.getText().toString();
         // Clear the list
         adapterList.clear();
         // If the "All" button is toggled, clear the list in the adapter and populate it with all the values from storage.
-        if(filter.equals("All")){
+        if(tab.equals("All")){
+
+            filter = 1;
 
             for(Item item: allList){
                 HashMap hm = new HashMap<String, String>();
@@ -206,7 +211,9 @@ public class MainActivity extends Activity {
 
         }
         // If the "Medium" button is toggled, clear the list in the adapter and populate it with all the values with priority 1 (medium) from storage.
-        if(filter.equals("Medium")){
+        if(tab.equals("Medium")){
+
+            filter = 2;
 
             for(Item item: mediumList){
                 HashMap hm = new HashMap<String, String>();
@@ -217,7 +224,9 @@ public class MainActivity extends Activity {
 
         }
         // If the "High" button is toggled, clear the list in the adapter and populate it with all the values with priority 2 (high) from storage.
-        if(filter.equals("High")){
+        if(tab.equals("High")){
+
+            filter = 3;
 
             for(Item item: highList){
                 HashMap hm = new HashMap<String, String>();
@@ -254,34 +263,20 @@ public class MainActivity extends Activity {
         @Override
         public boolean onItemLongClick(android.widget.AdapterView <?> parent, View view, int position, long id) {
             // If all Todo items are showing, remove from appropriate lists
-            Item t = null;
-            if(filter.equals("All")){
-                t = allList.get(position);
-            }
-            // If medium priority todos are showing, remove from appropriate lists
-            else if(filter.equals("Medium")){
-                t = mediumList.get(position);
-            }
-            // If high todos are showing, remove from appropriate lists
-            else{
-                t = highList.get(position);
-            }
 
-            if(t.getPriority() == 1){
-                mediumList.remove(t);
-            }
-            if(t.getPriority() == 2){
-                highList.remove(t);
-            }
+            Item itemToDelete = filterLists.get(filter).get(position);
 
-            allList.remove(t);
+            allList.remove(itemToDelete);
+
+            filterLists.get(filter).remove(itemToDelete);
 
             // Remove the item in the list
             adapterList.remove(position);
 
-            Store todosStore = dsm.getStore();
+            // Delete item from local store
+            Store local = dsm.getTodosStore();
 
-            todosStore.delete(t).continueWith(new Continuation<String, Void>() {
+            local.delete(itemToDelete).continueWith(new Continuation<String, Void>() {
 
                 @Override
                 public Void then(Task<String> task) throws Exception {
@@ -300,20 +295,13 @@ public class MainActivity extends Activity {
                     // If the result succeeds, reload the list.
                     else {
 
+                        popLists();
 
-                        dsm.setItemList();
-                        //allList.clear();
-                        dsm.getItemList();
-
+                        Log.i("STORE_CHANGE:","Item deleted from local store " + task.getResult());
                     }
                     return null;
                 }
             },Task.UI_THREAD_EXECUTOR);
-
-            popLists();
-
-            // Must inform the adapter whenever the data set has changed or else the appropriate data will not be displayed.
-            simpleAdapter.notifyDataSetChanged();
 
             return true;
         }
@@ -359,40 +347,19 @@ public class MainActivity extends Activity {
                     // Create variable to store newly created Todo
                     Item todoToAdd = null;
                     // If "All" tab is selected set the priority to low
-                    if(filter.equals("All")) {
-                        hm.put("priority", Integer.toString(priority[0]));
 
-                        todoToAdd = new Item(toAdd);
-                    }
-                    // If "Medium" tab is selected set the priority to medium
-                    if(filter.equals("Medium")) {
-                        hm.put("priority", Integer.toString(priority[1]));
+                    hm.put("priority", Integer.toString(priority[filter-1]));
 
-                        todoToAdd = new Item(toAdd, 1);
+                    todoToAdd = new Item(toAdd, filter-1);
 
-                        // Add new Todo to medium priority list
-                        mediumList.add(todoToAdd);
-                    }
-                    // If "High" tab is selected set the priority to medium
-                    if(filter.equals("High")) {
-                        hm.put("priority", Integer.toString(priority[2]));
+                    Store store = dsm.getTodosStore();
 
-                        todoToAdd = new Item(toAdd, 2);
-                        // Add new Todo to high priority list
-                        highList.add(todoToAdd);
-                    }
-                    // Add new Todo item to the adapter
-                    allList.add(todoToAdd);
-                    adapterList.add(hm);
-
-                    Store todosStore = dsm.getStore();
-
-                    todosStore.save(todoToAdd).continueWith(new Continuation<Object, Void>() {
+                    store.save(todoToAdd).continueWith(new Continuation<Object, Void>() {
 
                         @Override
                         public Void then(Task<Object> task) throws Exception {
                             // Log if the save was cancelled.
-                            if (task.isCancelled()){
+                            if (task.isCancelled()) {
                                 Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
 
                             }
@@ -405,24 +372,17 @@ public class MainActivity extends Activity {
 
                             // If the result succeeds, load the list.
                             else {
+                                allList.add((Item) task.getResult());
 
+                                popLists();
 
-                                //allList.clear();
-                                dsm.setItemList();
-                                allList = dsm.getItemList();
-
+                                Log.i("STORE_CHANGE:","Item added to local store " + task.getResult());
                             }
                             return null;
                         }
 
                     });
 
-                    popLists();
-
-                    // Make sure adapter knows display data has been changed
-                    simpleAdapter.notifyDataSetChanged();
-
-                    Log.d("Successfully added-->", toAdd);
                 }
                 // Kill dialog when finished, or if no text was added
                 addDialog.dismiss();
@@ -470,46 +430,46 @@ public class MainActivity extends Activity {
                 // Make sure there is text in the Edit Text box
                 if (!newText.isEmpty()) {
 
-                    allList.get(pos).setName(newText);
+                    ArrayList<Item> listShowing = filterLists.get(filter);
 
-                    adapterList.get(pos).put("txt", newText);
+                    Item toEdit = listShowing.get(pos);
 
-                    Store todosStore = dsm.getStore();
+                    allList.remove(toEdit);
 
-                    todosStore.save(allList.get(pos)).continueWith(new Continuation<Object, Void>() {
+                    toEdit.setName(newText);
+
+                    Store store = dsm.getTodosStore();
+
+                    store.save(toEdit).continueWith(new Continuation<Object, Void>() {
 
                         @Override
                         public Void then(Task<Object> task) throws Exception {
-                            if(task.isCancelled()) {
-                                Log.e(CLASS_NAME, "Exception : " + task.toString() + " was cancelled.");
+                            // Log if the save was cancelled.
+                            if (task.isCancelled()) {
+                                Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
 
                             }
-
+                            // Log error message, if the save task fails.
                             else if (task.isFaulted()) {
+
                                 Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
 
-
                             }
 
+                            // If the result succeeds, load the list.
                             else {
+                                allList.add((Item) task.getResult());
 
+                                popLists();
 
-                                //allList.clear();
-                                dsm.setItemList();
-                                allList = dsm.getItemList();
+                                Log.i("STORE_CHANGE:","Item edited in local store " + task.getResult());
 
                             }
                             return null;
                         }
 
-                    },Task.UI_THREAD_EXECUTOR);
+                    });
 
-                    // If I dont call this I get an exception when I attempt to edit the same object more than once before syncing
-
-                    popLists();
-                    // Make sure adapter knows display data has been changed
-                    simpleAdapter.notifyDataSetChanged();
-                    Log.d("Successfully changed-->", newText);
                 }
                 addDialog.dismiss();
             }
@@ -517,7 +477,9 @@ public class MainActivity extends Activity {
     }
 
     private void popLists(){
+
         if(allList!=null){
+            dsm.sortItems(allList);
             mediumList.clear();
             highList.clear();
             for(Item item:allList){
@@ -528,7 +490,19 @@ public class MainActivity extends Activity {
                     highList.add(item);
                 }
             }
+
+            filterLists.clear();
+
+            filterLists.append(1, allList);
+            filterLists.append(2, mediumList);
+            filterLists.append(3, highList);
+
+            filterChange();
+
         }
+
+
+
     }
 
     /**
@@ -540,106 +514,61 @@ public class MainActivity extends Activity {
         // Fetch position of item in list view?
         Integer pos = lv.getPositionForView(view);
         // If the "All" tab is selected
-        Item t = null;
 
-        if(filter.equals("All")) {
-            // Grab list item Todo object
-            t = allList.get(pos);
-            // Move Todo object to appropriate list based on current priority
-            if(t.getPriority() == 1){
-                highList.add(t);
-                mediumList.remove(t);
-            }
-            if(t.getPriority() == 2){
-                highList.remove(t);
-            }
-            if(t.getPriority()==0){
-                mediumList.add(t);
-            }
-            // Change the priority on the Todo object itself
-            t.priorityCycle();
-            // Change the priority color to be in sync with the associated Todo object
-            adapterList.get(pos).put("priority", Integer.toString(priority[t.getPriority()]));
-        }
-        // If the "Medium" tab is selected move the object to high priority list and cycle the priority to high
-        if(filter.equals("Medium")) {
-            t = mediumList.get(pos);
-            t.priorityCycle();
-            adapterList.remove(adapterList.get(pos));
-            highList.add(t);
-            mediumList.remove(t);
-        }
-        // If the "High" tab is selected remove the object from the high priority list and cycle the priority to low
-        if(filter.equals("High")) {
-            t = highList.get(pos);
-            t.priorityCycle();
-            adapterList.remove(adapterList.get(pos));
-            highList.remove(t);
-        }
+        ArrayList<Item> listShowing = filterLists.get(filter);
 
-        Store todosStore = dsm.getStore();
+        Item toUpdate = listShowing.get(pos);
 
-        todosStore.save(t).continueWith(new Continuation<Object, Void>() {
+        allList.remove(toUpdate);
+
+        toUpdate.priorityCycle();
+
+        Store store = dsm.getTodosStore();
+
+        store.save(toUpdate).continueWith(new Continuation<Object, Void>() {
 
             @Override
             public Void then(Task<Object> task) throws Exception {
-                if(task.isCancelled()) {
-                    Log.e(CLASS_NAME, "Exception : " + task.toString() + " was cancelled.");
+                // Log if the save was cancelled.
+                if (task.isCancelled()) {
+                    Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
 
                 }
-
+                // Log error message, if the save task fails.
                 else if (task.isFaulted()) {
+
                     Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
 
-
                 }
 
+                // If the result succeeds, load the list.
                 else {
+                   allList.add((Item) task.getResult());
 
-                    //allList.clear();
-                    dsm.setItemList();
-                    allList = dsm.getItemList();
+                    Log.i("STORE_CHANGE:","Item edited in local store " + task.getResult());
 
+                    popLists();
                 }
                 return null;
+
             }
 
-        },Task.UI_THREAD_EXECUTOR);
-
-        popLists();
-
-        // Make sure adapter knows display data has been changed
-        simpleAdapter.notifyDataSetChanged();
-    }
-    public String getFilter(){
-        return filter;
+        });
     }
 
     private class DataBaseSync extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids){
-            // load your xml feed asynchronously
+
             dsm.sync(true);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void params) {
-            allList = dsm.getItemList();
-            popLists();
-            if(filter.equals("All")){
-                onToggle(findViewById(R.id.button));
-            }
-            // If medium priority todos are showing, remove from appropriate lists
-            else if(filter.equals("Medium")){
-                onToggle(findViewById(R.id.button2));
-            }
-            // If high todos are showing, remove from appropriate lists
-            else{
-                onToggle(findViewById(R.id.button3));
-            }
 
+            popLists();
         }
     }
 

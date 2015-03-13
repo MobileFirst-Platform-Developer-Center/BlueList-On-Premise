@@ -82,7 +82,6 @@ public class DataStoreManager {
     Context context;
     Activity activity;
 
-    // Should I make the user supply a context everytime they want to call this?
     public static DataStoreManager getInstance(Context context, Activity activity) {
         if(instance == null) {
             instance = new DataStoreManager(context, activity);
@@ -212,7 +211,7 @@ public class DataStoreManager {
         // Set the data object mapper
         todosStore.setMapper(new DataObjectMapper());
         try {
-            todosStore.getMapper().setDataTypeForClassName("TodoItem", Item.class.getCanonicalName());//TODO THIS IS CAUSING THE ERROR?????????????????????????
+            todosStore.getMapper().setDataTypeForClassName("TodoItem", Item.class.getCanonicalName());
         } catch (Exception e) {
             Log.e(CLASS_NAME, "Error setting data type for class", e);
         }
@@ -295,7 +294,7 @@ public class DataStoreManager {
         return itemList;
     }
 
-    private void sortItems(List<Item> theList) {
+    public void sortItems(List<Item> theList) {
         // Sort collection by case insensitive alphabetical order.
         Collections.sort(theList, new Comparator<Item>() {
             public int compare(Item lhs,
@@ -341,9 +340,11 @@ public class DataStoreManager {
                         Log.e(CLASS_NAME, "Pull replication failed.  Error replicating to local.");
                         Log.e(CLASS_NAME, listener.error.toString());
                     }
+                    setItemList();
                 }
                 else {
                     replicator.start();
+                    setItemList();
                 }
             }
         } catch (Exception e) {
@@ -367,7 +368,7 @@ public class DataStoreManager {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(context, "Pushing Items to Cloudant remote", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Pushing Items to Cloudant remote", Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -396,18 +397,18 @@ public class DataStoreManager {
                         Log.e(CLASS_NAME, "Push replication failed.  Error replicating to remote.");
                         Log.e(CLASS_NAME, listener.error.toString());
                     }
-                    setItemList();
+
                 }
                 else {
                     replicator.start();
-                    setItemList();
+
                 }
             }
         } catch (Exception e) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(context, "Error replicating with Cloudant", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Error replicating with Cloudant", Toast.LENGTH_LONG).show();
                 }
             });
             // replication failed
