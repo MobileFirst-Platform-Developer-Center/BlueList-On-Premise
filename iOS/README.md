@@ -39,27 +39,15 @@ Make sure you have correctly installed and set up CocoaPods. If you have not don
 
 Install CocoaPods with the following command in Terminal:
 
-
 `$ sudo gem install cocoapods`
-
 
 Setup CocoaPods using the following terminal command:
 
 `$ pod setup`
 
-The next step is to download and install the required dependencies for this project using the Podfile that has been provided. If want to create or have your own podfile please include the following content:
-
-`source 'https://github.com/CocoaPods/Specs.git'`
-`platform :ios, '7.0'`
-`pod 'IMFDataLocal', '1.0.0'`
-`pod 'CloudantToolkitLocal', '1.0.0'`
-
-To install the dependencies defined in a podfile navigate to the Xcode project directory in terminal (/mfp-bluelist-on-premises/iOS/objective-c/ in the sample provided) and run the following command:
-
+The next step is to download and install the required dependencies for this project using the Podfile that has been provided. Navigate to the Xcode project directory in terminal (/mfp-bluelist-on-premises/iOS/objective-c/ in the sample provided) and run the following command:
 
 `$ pod install`
-
-Note: The name of the podfile you choose must be named “Podfile” or “podfile” for the pod install to work correctly.
 
 After the dependencies have been installed open the bluelist-objective-c.xcworkspace. When using CocoaPods you must use the .xcworkspace instead of the .xcodeproject file because of how the dependencies are configured.
 
