@@ -1,8 +1,8 @@
 ##Sample: mfp-bluelist-on-premises
 
-The mfp-bluelist-on-premises samples are simple todo task list applications. In mfp-bluelist-on-premises, the tasks persist to a mobile backend, using the Cloudant NoSQL DB service.
+The mfp-bluelist-on-premises iOS sample is a simple todo task list applications. In mfp-bluelist-on-premises for iOS, the tasks persist to a mobile backend, using the Cloudant NoSQL DB service.
 
-This sample will leverage the technology available in the IBM MobileFirst Foundation to allow us to store data for this mobile application. This will be accomplished by utilizing the IBM MobileFirst Platform Cloudant Data Layer Local Edition. The Cloudant Data Layer Local Edition is an advanced NoSQL database that is capable of handling a wide variety of data types, such as JSON, full-text, and geospatial data. This sample shows how to integrate and utilize the proper SDKs and APIs into iOS and Android MobileFirst applications.
+This sample will leverage the technology available in the IBM MobileFirst Foundation to allow us to store data for this mobile application. This will be accomplished by utilizing the IBM MobileFirst Platform Cloudant Data Layer Local Edition. The Cloudant Data Layer Local Edition is an advanced NoSQL database that is capable of handling a wide variety of data types, such as JSON, full-text, and geospatial data. This sample shows how to integrate and utilize the proper SDKs and APIs into an iOS application.
 
 ##Downloading the samples
 
