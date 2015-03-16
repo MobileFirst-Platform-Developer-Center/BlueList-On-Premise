@@ -14,11 +14,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <view key="tableHeaderView" contentMode="scaleToFill" id="bjh-3M-n2e">
-                            <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                            <rect key="frame" x="0.0" y="64" width="600" height="54"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <subviews>
                                 <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="GCI-R1-5xU">
-                                    <rect key="frame" x="184" y="8" width="235" height="29"/>
+                                    <rect key="frame" x="184" y="13" width="235" height="27"/>
                                     <constraints>
                                         <constraint firstAttribute="width" constant="235" id="BNx-ov-yex"/>
                                     </constraints>
@@ -34,7 +34,8 @@
                             </subviews>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <constraints>
-                                <constraint firstItem="GCI-R1-5xU" firstAttribute="top" secondItem="bjh-3M-n2e" secondAttribute="topMargin" id="GoA-VA-NTG"/>
+                                <constraint firstItem="GCI-R1-5xU" firstAttribute="top" secondItem="bjh-3M-n2e" secondAttribute="topMargin" constant="5" id="GoA-VA-NTG"/>
+                                <constraint firstAttribute="bottom" secondItem="GCI-R1-5xU" secondAttribute="bottom" constant="15" id="Tjn-mp-XeP"/>
                                 <constraint firstAttribute="centerX" secondItem="GCI-R1-5xU" secondAttribute="centerX" constant="-1.5" id="b7h-25-24y"/>
                             </constraints>
                         </view>
@@ -45,7 +46,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="HED-WL-uTm">
-                                            <rect key="frame" x="60" y="0.0" width="525" height="36"/>
+                                            <rect key="frame" x="60" y="4" width="525" height="36"/>
                                             <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="16"/>
                                             <textInputTraits key="textInputTraits" returnKeyType="done"/>
                                             <connections>
@@ -62,7 +63,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Add Item" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Hnt-Vd-3Dy">
-                                            <rect key="frame" x="60" y="0.0" width="525" height="36"/>
+                                            <rect key="frame" x="60" y="4" width="525" height="36"/>
                                             <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="16"/>
                                             <textInputTraits key="textInputTraits" returnKeyType="done"/>
                                             <connections>

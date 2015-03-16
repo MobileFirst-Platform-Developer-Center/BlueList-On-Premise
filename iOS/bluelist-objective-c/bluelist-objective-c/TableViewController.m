@@ -279,6 +279,7 @@
         //doing push, push is done read items from local data store and end the refresh UI
         [self listItems:^{
             [self.refreshControl performSelectorOnMainThread:@selector(endRefreshing) withObject:nil waitUntilDone:YES];
+            
         }];
     }
     
