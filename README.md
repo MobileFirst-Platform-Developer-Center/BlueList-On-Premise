@@ -40,3 +40,5 @@ See the instructions in the android/README.md file.
 ## Running the iOS sample (mfp-bluelist-on-premises/iOS)
 
 See the instructions in the iOS/README.md file.
+
+## For More Info on How to Run the Samples and How They Work See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-0/advanced-topics/cloudant-nosql-db-api/)
