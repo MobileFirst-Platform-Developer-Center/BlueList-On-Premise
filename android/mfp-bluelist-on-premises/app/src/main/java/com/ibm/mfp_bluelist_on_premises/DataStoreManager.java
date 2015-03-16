@@ -72,7 +72,7 @@ public class DataStoreManager {
 
     private static final String CLASS_NAME = DataStoreManager.class.getSimpleName();
     private static final String IndexName = "todosIndex";
-    ArrayList<Item> itemList;
+    ArrayList<TodoItem> todoItemList;
     Store todosStore;
     Store remoteStore;
     Store localStore;
@@ -99,7 +99,7 @@ public class DataStoreManager {
 
     protected DataStoreManager(Context context, Activity activity){
 
-        itemList = new ArrayList<Item>();
+        todoItemList = new ArrayList<TodoItem>();
 
         this.activity = activity;
 
@@ -211,7 +211,7 @@ public class DataStoreManager {
         // Set the data object mapper
         todosStore.setMapper(new DataObjectMapper());
         try {
-            todosStore.getMapper().setDataTypeForClassName("TodoItem", Item.class.getCanonicalName());
+            todosStore.getMapper().setDataTypeForClassName("TodoItem", TodoItem.class.getCanonicalName());
         } catch (Exception e) {
             Log.e(CLASS_NAME, "Error setting data type for class", e);
         }
@@ -260,7 +260,7 @@ public class DataStoreManager {
                 // This separate thread is giving me null pointers in my UI
                 @Override
                 public Void then(Task<List> task) throws Exception {
-                    final List<Item> objects = task.getResult();
+                    final List<TodoItem> objects = task.getResult();
                     // Log if the find was cancelled.
                     if (task.isCancelled()){
                         Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
@@ -274,12 +274,12 @@ public class DataStoreManager {
                     // If the result succeeds, load the list.
                     else {
                         // Clear local itemList.
-                        itemList.clear();
+                        todoItemList.clear();
                         // We'll be reordering and repopulating from DataService.
-                        for(Item item:objects) {
-                            itemList.add((Item) item);
+                        for(TodoItem todoItem :objects) {
+                            todoItemList.add((TodoItem) todoItem);
                         }
-                        sortItems(itemList);
+                        sortItems(todoItemList);
                     }
                     return null;
                 }
@@ -291,15 +291,15 @@ public class DataStoreManager {
 
     }
 
-    public ArrayList<Item> getItemList(){
-        return itemList;
+    public ArrayList<TodoItem> getTodoItemList(){
+        return todoItemList;
     }
 
-    public void sortItems(List<Item> theList) {
+    public void sortItems(List<TodoItem> theList) {
         // Sort collection by case insensitive alphabetical order.
-        Collections.sort(theList, new Comparator<Item>() {
-            public int compare(Item lhs,
-                               Item rhs) {
+        Collections.sort(theList, new Comparator<TodoItem>() {
+            public int compare(TodoItem lhs,
+                               TodoItem rhs) {
                 String lhsName = lhs.getName();
                 String rhsName = rhs.getName();
                 return lhsName.compareToIgnoreCase(rhsName);

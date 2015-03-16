@@ -6,23 +6,23 @@ import com.cloudant.toolkit.mapper.Metadata;
 /**
  * Created by drcariel on 3/12/2015.
  */
-public class Item implements DataObject {
+public class TodoItem implements DataObject {
 
     private Metadata metadata = null;
     private String name;
     private Integer priority;
 
-    public Item(){
+    public TodoItem(){
         this.name = "";
         this.priority = 0;
     }
 
-    public Item(String name){
+    public TodoItem(String name){
         this.name = name;
         this.priority = 0;
     }
 
-    public Item(String name, Integer priority){
+    public TodoItem(String name, Integer priority){
         this.name = name;
         this.priority = priority;
     }

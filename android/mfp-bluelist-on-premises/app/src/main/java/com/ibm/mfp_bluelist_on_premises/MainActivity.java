@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
     // Need filter value to know what and where to add items, basically maintains state of list view
     private Integer filter;
     // List of all todo objects
-    private ArrayList<Item> allList;
+    private ArrayList<TodoItem> allList;
     // Main List View
     private ListView lv;
     // Variable to hold swipe refresh layout
@@ -54,9 +54,9 @@ public class MainActivity extends Activity {
     // List of Hash pairs (DESCRIPTOR, VALUE), used for UI specific listing of image and text
     private List<HashMap<String,String>> adapterList;
     // Maintains list of medium priority todos
-    private ArrayList<Item> mediumList;
+    private ArrayList<TodoItem> mediumList;
     // Maintains list of high priority todos
-    private ArrayList<Item> highList;
+    private ArrayList<TodoItem> highList;
 
     // List of priority src images
     private int[] priority = new int[]{
@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
             R.id.button3,
     };
 
-    private SparseArray<ArrayList<Item>> filterLists;
+    private SparseArray<ArrayList<TodoItem>> filterLists;
     // Data Store Manager singleton to manipulate local store and get updated lists
     private DataStoreManager dsm;
     // Need to save activity to pass to DataStore Manager so Toasts can be called at appropriate times
@@ -126,13 +126,13 @@ public class MainActivity extends Activity {
             dsm.setContext(getApplicationContext());
 
             // Initialize priority lists
-            mediumList = new ArrayList<Item>();
-            highList = new ArrayList<Item>();
+            mediumList = new ArrayList<TodoItem>();
+            highList = new ArrayList<TodoItem>();
 
             // Initialize all list
-            allList = new ArrayList<Item>();
+            allList = new ArrayList<TodoItem>();
 
-            filterLists = new SparseArray<ArrayList<Item>>();
+            filterLists = new SparseArray<ArrayList<TodoItem>>();
 
             filterLists.append(1, allList);
             filterLists.append(2, mediumList);
@@ -141,7 +141,7 @@ public class MainActivity extends Activity {
             // Set default filter to "All"
             filter = 1;
 
-            allList.addAll(dsm.getItemList());
+            allList.addAll(dsm.getTodoItemList());
 
             popLists();
 
@@ -202,10 +202,10 @@ public class MainActivity extends Activity {
 
             filter = 1;
 
-            for(Item item: allList){
+            for(TodoItem todoItem : allList){
                 HashMap hm = new HashMap<String, String>();
-                hm.put("txt", item.getName());
-                hm.put("priority", Integer.toString(priority[item.getPriority()]));
+                hm.put("txt", todoItem.getName());
+                hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
             }
 
@@ -215,10 +215,10 @@ public class MainActivity extends Activity {
 
             filter = 2;
 
-            for(Item item: mediumList){
+            for(TodoItem todoItem : mediumList){
                 HashMap hm = new HashMap<String, String>();
-                hm.put("txt", item.getName());
-                hm.put("priority", Integer.toString(priority[item.getPriority()]));
+                hm.put("txt", todoItem.getName());
+                hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
             }
 
@@ -228,10 +228,10 @@ public class MainActivity extends Activity {
 
             filter = 3;
 
-            for(Item item: highList){
+            for(TodoItem todoItem : highList){
                 HashMap hm = new HashMap<String, String>();
-                hm.put("txt", item.getName());
-                hm.put("priority", Integer.toString(priority[item.getPriority()]));
+                hm.put("txt", todoItem.getName());
+                hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
             }
 
@@ -264,11 +264,11 @@ public class MainActivity extends Activity {
         public boolean onItemLongClick(android.widget.AdapterView <?> parent, View view, int position, long id) {
             // If all Todo items are showing, remove from appropriate lists
 
-            Item itemToDelete = filterLists.get(filter).get(position);
+            TodoItem todoItemToDelete = filterLists.get(filter).get(position);
 
-            allList.remove(itemToDelete);
+            allList.remove(todoItemToDelete);
 
-            filterLists.get(filter).remove(itemToDelete);
+            filterLists.get(filter).remove(todoItemToDelete);
 
             // Remove the item in the list
             adapterList.remove(position);
@@ -276,7 +276,7 @@ public class MainActivity extends Activity {
             // Delete item from local store
             Store local = dsm.getTodosStore();
 
-            local.delete(itemToDelete).continueWith(new Continuation<String, Void>() {
+            local.delete(todoItemToDelete).continueWith(new Continuation<String, Void>() {
 
                 @Override
                 public Void then(Task<String> task) throws Exception {
@@ -345,12 +345,12 @@ public class MainActivity extends Activity {
                     // Set text to user inputted text
                     hm.put("txt", toAdd);
                     // Create variable to store newly created Todo
-                    Item todoToAdd = null;
+                    TodoItem todoToAdd = null;
                     // If "All" tab is selected set the priority to low
 
                     hm.put("priority", Integer.toString(priority[filter-1]));
 
-                    todoToAdd = new Item(toAdd, filter-1);
+                    todoToAdd = new TodoItem(toAdd, filter-1);
 
                     Store store = dsm.getTodosStore();
 
@@ -372,7 +372,7 @@ public class MainActivity extends Activity {
 
                             // If the result succeeds, load the list.
                             else {
-                                allList.add((Item) task.getResult());
+                                allList.add((TodoItem) task.getResult());
 
                                 popLists();
 
@@ -430,9 +430,9 @@ public class MainActivity extends Activity {
                 // Make sure there is text in the Edit Text box
                 if (!newText.isEmpty()) {
 
-                    ArrayList<Item> listShowing = filterLists.get(filter);
+                    ArrayList<TodoItem> listShowing = filterLists.get(filter);
 
-                    Item toEdit = listShowing.get(pos);
+                    TodoItem toEdit = listShowing.get(pos);
 
                     allList.remove(toEdit);
 
@@ -458,7 +458,7 @@ public class MainActivity extends Activity {
 
                             // If the result succeeds, load the list.
                             else {
-                                allList.add((Item) task.getResult());
+                                allList.add((TodoItem) task.getResult());
 
                                 popLists();
 
@@ -482,12 +482,12 @@ public class MainActivity extends Activity {
             dsm.sortItems(allList);
             mediumList.clear();
             highList.clear();
-            for(Item item:allList){
-                if(item.getPriority()==1){
-                    mediumList.add(item);
+            for(TodoItem todoItem :allList){
+                if(todoItem.getPriority()==1){
+                    mediumList.add(todoItem);
                 }
-                if(item.getPriority()>1){
-                    highList.add(item);
+                if(todoItem.getPriority()>1){
+                    highList.add(todoItem);
                 }
             }
 
@@ -515,9 +515,9 @@ public class MainActivity extends Activity {
         Integer pos = lv.getPositionForView(view);
         // If the "All" tab is selected
 
-        ArrayList<Item> listShowing = filterLists.get(filter);
+        ArrayList<TodoItem> listShowing = filterLists.get(filter);
 
-        Item toUpdate = listShowing.get(pos);
+        TodoItem toUpdate = listShowing.get(pos);
 
         allList.remove(toUpdate);
 
@@ -543,7 +543,7 @@ public class MainActivity extends Activity {
 
                 // If the result succeeds, load the list.
                 else {
-                   allList.add((Item) task.getResult());
+                   allList.add((TodoItem) task.getResult());
 
                     Log.i("STORE_CHANGE:","Item edited in local store " + task.getResult());
 
