@@ -78,7 +78,7 @@ public class DataStoreManager {
     Store localStore;
     DataManager manager;
     WLClient client;
-    SampleChallengeHandler sampleChallengeHandler;
+    BlueListChallengeHandler blueListChallengeHandler;
     Context context;
     Activity activity;
 
@@ -139,10 +139,10 @@ public class DataStoreManager {
             if (secScope==null || secScope.isEmpty() || secScope.equalsIgnoreCase("")){
                 secScope = DEFAULT_NAME_SEC_SCOPE;
             }
-            sampleChallengeHandler = new SampleChallengeHandler(secScope);
-            sampleChallengeHandler.UserName = secUsername;
-            sampleChallengeHandler.UserPassword = secUserPassword;
-            sampleChallengeHandler.AdapterName = secAdapaterName;
+            blueListChallengeHandler = new BlueListChallengeHandler(secScope);
+            blueListChallengeHandler.UserName = secUsername;
+            blueListChallengeHandler.UserPassword = secUserPassword;
+            blueListChallengeHandler.AdapterName = secAdapaterName;
 
             Log.i(CLASS_NAME, "Cloudant Proxy URL value: " + CLOUDANT_PROXY_URL);
             Log.i(CLASS_NAME, "Database name value: " + DBName);
@@ -161,7 +161,7 @@ public class DataStoreManager {
         try {
             manager = DataManager.initialize(context, new URL(CLOUDANT_PROXY_URL));
             client = WLClient.createInstance(context);
-            client.registerChallengeHandler(sampleChallengeHandler);
+            client.registerChallengeHandler(blueListChallengeHandler);
         } catch (MalformedURLException e) {
             Log.e(CLASS_NAME,
                     "The Cloudant proxy URL was invalid.", e);
@@ -217,6 +217,7 @@ public class DataStoreManager {
         }
 
         List<IndexField> indexFields = new ArrayList<IndexField>();
+        // TODO: Ask about this indexing
         indexFields.add(new IndexField("@datatype"));
 
         Task t = todosStore.createIndex(IndexName, indexFields);
@@ -311,7 +312,7 @@ public class DataStoreManager {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(context, "Pulling Items from Cloudant remote", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Pulling Items from Cloudant remote", Toast.LENGTH_LONG).show();
                 }
             });
 
