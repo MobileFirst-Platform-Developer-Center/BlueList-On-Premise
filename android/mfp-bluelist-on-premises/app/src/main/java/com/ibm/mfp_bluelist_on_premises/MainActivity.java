@@ -29,18 +29,12 @@ import bolts.Continuation;
 import bolts.Task;
 
 /**
- * Created by drcariel on 3/12/2015.
- *
- *
- * TODO: Am I able to handle rotation at the moment? Does the DataStoreManager singleton stick around?
  *
  */
 public class MainActivity extends Activity {
 
     private static final String CLASS_NAME = MainActivity.class.getSimpleName();
 
-    // Splash Dialog
-    protected Dialog bluemixSplash;
     // Need filter value to know what and where to add items, basically maintains state of list view
     private Integer filter;
     // List of all todo objects
@@ -65,6 +59,7 @@ public class MainActivity extends Activity {
             R.mipmap.high,
     };
 
+    // List of filter buttons
     private int[] filters = new int[]{
             R.id.button,
             R.id.button2,
@@ -77,6 +72,10 @@ public class MainActivity extends Activity {
     // Need to save activity to pass to DataStore Manager so Toasts can be called at appropriate times
     Activity main;
 
+    /**
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,6 +107,7 @@ public class MainActivity extends Activity {
 
         if(savedInstanceState!=null && savedInstanceState.containsKey("allData") && savedInstanceState.containsKey("mediumData") && savedInstanceState.containsKey("highData")){
 
+            //TODO: Am I able to handle rotation at the moment? Does the DataStoreManager singleton stick around?
 //            allList = savedInstanceState.getParcelableArrayList("allData");
 //            mediumList = savedInstanceState.getParcelableArrayList("mediumData");
 //            highList = savedInstanceState.getParcelableArrayList("highData");
@@ -134,12 +134,12 @@ public class MainActivity extends Activity {
 
             filterLists = new SparseArray<ArrayList<TodoItem>>();
 
-            filterLists.append(1, allList);
-            filterLists.append(2, mediumList);
-            filterLists.append(3, highList);
+            filterLists.append(0, allList);
+            filterLists.append(1, mediumList);
+            filterLists.append(2, highList);
 
             // Set default filter to "All"
-            filter = 1;
+            filter = 0;
 
             allList.addAll(dsm.getTodoItemList());
 
@@ -149,11 +149,16 @@ public class MainActivity extends Activity {
 
     }
 
-
+    /**
+     *
+     */
     private void filterChange(){
-        onToggle(findViewById(filters[filter-1]));
+        onToggle(findViewById(filters[filter]));
     }
 
+    /**
+     *
+     */
     private SwipeRefreshLayout.OnRefreshListener RefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
 
         @Override
@@ -172,6 +177,10 @@ public class MainActivity extends Activity {
         }
     };
 
+    /**
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
 
@@ -187,7 +196,7 @@ public class MainActivity extends Activity {
 
     /**
      * When Each Priority Button is toggled, sort the list appropriately
-     * @param view
+     * @param view The tapped toggle button.
      */
     public void onToggle(View view) {
         // Get parent of toggle button (Radio Group) to check the Id, without this the filter tabs do not maintain visually
@@ -200,10 +209,10 @@ public class MainActivity extends Activity {
         // If the "All" button is toggled, clear the list in the adapter and populate it with all the values from storage.
         if(tab.equals("All")){
 
-            filter = 1;
+            filter = 0;
 
             for(TodoItem todoItem : allList){
-                HashMap hm = new HashMap<String, String>();
+                HashMap<String,String> hm = new HashMap<String, String>();
                 hm.put("txt", todoItem.getName());
                 hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
@@ -213,10 +222,10 @@ public class MainActivity extends Activity {
         // If the "Medium" button is toggled, clear the list in the adapter and populate it with all the values with priority 1 (medium) from storage.
         if(tab.equals("Medium")){
 
-            filter = 2;
+            filter = 1;
 
             for(TodoItem todoItem : mediumList){
-                HashMap hm = new HashMap<String, String>();
+                HashMap<String,String> hm = new HashMap<String, String>();
                 hm.put("txt", todoItem.getName());
                 hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
@@ -226,10 +235,10 @@ public class MainActivity extends Activity {
         // If the "High" button is toggled, clear the list in the adapter and populate it with all the values with priority 2 (high) from storage.
         if(tab.equals("High")){
 
-            filter = 3;
+            filter = 2;
 
             for(TodoItem todoItem : highList){
-                HashMap hm = new HashMap<String, String>();
+                HashMap<String,String> hm = new HashMap<String, String>();
                 hm.put("txt", todoItem.getName());
                 hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
@@ -258,7 +267,9 @@ public class MainActivity extends Activity {
         }
     };
 
-    // Long click listener for each item in the listView for delete functionality
+    /**
+     * Long click listener for each item in the listView for delete functionality
+     */
     private AdapterView.OnItemLongClickListener deleteListener = new AdapterView.OnItemLongClickListener(){
         @Override
         public boolean onItemLongClick(android.widget.AdapterView <?> parent, View view, int position, long id) {
@@ -310,8 +321,9 @@ public class MainActivity extends Activity {
 
     /**
      * Add function called when the plus in the upper left hand corner is pressed.
-     * The button creates a new pop-up dialog for the user to enter their new todo.
-     * @param view
+     * The button creates a new pop-up dialog for the user to enter their new TodoItem.
+     * When the 'Done' button is tapped, a new TodoItem is created in the UI and in the local data store.
+     * @param view The list item that is tapped.
      */
     public void addTodo(View view){
         //Create dialog pop-up
@@ -348,9 +360,9 @@ public class MainActivity extends Activity {
                     TodoItem todoToAdd = null;
                     // If "All" tab is selected set the priority to low
 
-                    hm.put("priority", Integer.toString(priority[filter-1]));
+                    hm.put("priority", Integer.toString(priority[filter]));
 
-                    todoToAdd = new TodoItem(toAdd, filter-1);
+                    todoToAdd = new TodoItem(toAdd, filter);
 
                     Store store = dsm.getTodosStore();
 
@@ -392,9 +404,8 @@ public class MainActivity extends Activity {
 
     /**
      * Edit function called when a list item is tapped. Very similar to add in implementation.
-     * @param view
+     * @param view The list item that is tapped.
      */
-
     public void editTodo(View view){
         // Gets position in list view of tapped item
         final Integer pos = lv.getPositionForView(view);
@@ -476,6 +487,9 @@ public class MainActivity extends Activity {
         });
     }
 
+    /**
+     *
+     */
     private void popLists(){
 
         if(allList!=null){
@@ -493,9 +507,9 @@ public class MainActivity extends Activity {
 
             filterLists.clear();
 
-            filterLists.append(1, allList);
-            filterLists.append(2, mediumList);
-            filterLists.append(3, highList);
+            filterLists.append(0, allList);
+            filterLists.append(1, mediumList);
+            filterLists.append(2, highList);
 
             filterChange();
 
@@ -507,11 +521,11 @@ public class MainActivity extends Activity {
 
     /**
      * Priority change function called when the image for any item is tapped.
-     * Changes both the color of the circle and the priority associated in the todo object
-     * @param view
+     * Changes both the color of the circle and the priority associated in the TodoItem object in the UI and local data store.
+     * @param view The TodoItem that has been tapped.
      */
     public void priorityChange(View view){
-        // Fetch position of item in list view?
+        // Fetch position of item in list view
         Integer pos = lv.getPositionForView(view);
         // If the "All" tab is selected
 
@@ -556,8 +570,16 @@ public class MainActivity extends Activity {
         });
     }
 
+    /**
+     *
+     */
     private class DataBaseSync extends AsyncTask<Void, Void, Void> {
 
+        /**
+         *
+         * @param voids
+         * @return
+         */
         @Override
         protected Void doInBackground(Void... voids){
 
@@ -565,6 +587,10 @@ public class MainActivity extends Activity {
             return null;
         }
 
+        /**
+         *
+         * @param params
+         */
         @Override
         protected void onPostExecute(Void params) {
 

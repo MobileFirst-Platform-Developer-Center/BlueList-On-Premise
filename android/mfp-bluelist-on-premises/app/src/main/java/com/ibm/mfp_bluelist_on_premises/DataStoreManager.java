@@ -38,15 +38,18 @@ import bolts.Continuation;
 import bolts.Task;
 
 /**
- * Created by drcariel on 3/12/2015.
+ * A {@code DataStoreManager} is used to manage the local and remote data stores.
+ * On creation, this singleton sets the object mapper and the WLClient along with the Data Manager.
+ * At the end of creation, objects are all pulled from the remote store to the local store.
+ * Each object is then formed into a TodoItem and saved in an ArrayList.
  */
 public class DataStoreManager {
     private static DataStoreManager instance = null;
 
     /**
-     * Default property values used if Bluelist properties not set. DO I need this? TODO: Move some code else where, maybe move all data interactions tpo be separate from UI
+     * Default property values used if Bluelist.properties is not set. DO I need this?
      */
-    private static String DEFAULT_CLOUDANT_PROXY_URL = "http://10.0.2.2:9080/imfdata";  //"http://imfdata02.rtp.raleigh.ibm.com:10080/imfdata";
+    private static String DEFAULT_CLOUDANT_PROXY_URL = "http://10.0.2.2:9080/imfdata";
     private static String DEFAULT_DBName = "todosdb";
     private static String DEFAULT_NAME_SEC_USERNAME = "james";
     private static String DEFAULT_NAME_SEC_USERPW = "42";
@@ -54,7 +57,7 @@ public class DataStoreManager {
     private static String DEFAULT_NAME_SEC_SCOPE = "cloudant";
 
     /**
-     * Values set from Bluelist properties file.
+     * Values set from Bluelist.properties file.
      */
     private static String CLOUDANT_PROXY_URL;  // e.g. "http://imfdata02.rtp.raleigh.ibm.com:10080/imfdata";
     private static String DBName;              // name of the database with the items documents
@@ -72,6 +75,7 @@ public class DataStoreManager {
 
     private static final String CLASS_NAME = DataStoreManager.class.getSimpleName();
     private static final String IndexName = "todosIndex";
+
     ArrayList<TodoItem> todoItemList;
     Store todosStore;
     Store remoteStore;
@@ -81,21 +85,6 @@ public class DataStoreManager {
     BlueListChallengeHandler blueListChallengeHandler;
     Context context;
     Activity activity;
-
-    public static DataStoreManager getInstance(Context context, Activity activity) {
-        if(instance == null) {
-            instance = new DataStoreManager(context, activity);
-        }
-        return instance;
-    }
-
-    public void setContext(Context context){
-        this.context = context;
-    }
-
-    public void setActivity(Activity activity){
-        this.activity = activity;
-    }
 
     protected DataStoreManager(Context context, Activity activity){
 
@@ -139,6 +128,7 @@ public class DataStoreManager {
             if (secScope==null || secScope.isEmpty() || secScope.equalsIgnoreCase("")){
                 secScope = DEFAULT_NAME_SEC_SCOPE;
             }
+
             blueListChallengeHandler = new BlueListChallengeHandler(secScope);
             blueListChallengeHandler.UserName = secUsername;
             blueListChallengeHandler.UserPassword = secUserPassword;
@@ -237,10 +227,48 @@ public class DataStoreManager {
         setItemList();
 
     }
+
+    /**
+     * When needed, the DataStoreManager can be grabbed using DataStoreManager.getInstance
+     * Only one should ever be created so if one does not exist, it will be created.
+     * @param context needed for WLClient and DataManager initialization and to find props files
+     * @param activity needed to handle Toasts in pull and push replication
+     * @return instance the DataStoreManager Singleton
+     */
+    public static DataStoreManager getInstance(Context context, Activity activity) {
+        if(instance == null) {
+            instance = new DataStoreManager(context, activity);
+        }
+        return instance;
+    }
+
+    /**
+     *
+     * @param context
+     */
+    public void setContext(Context context){
+        this.context = context;
+    }
+
+    /**
+     *
+     * @param activity needed for change from splash screen to MainActivity
+     */
+    public void setActivity(Activity activity){
+        this.activity = activity;
+    }
+
+    /**
+     * Grabs local Store
+     * @return localStore
+     */
     public Store getStore() {
         return localStore;
     }
 
+    /**
+     * Converts local store into and ArrayList of TodoItem objects
+     */
     public void setItemList() {
 
 
@@ -257,7 +285,6 @@ public class DataStoreManager {
             // Query all the Item objects from the server.
             localStore.performQuery(query).continueWith(new Continuation<List, Void>() {
 
-                // This separate thread is giving me null pointers in my UI
                 @Override
                 public Void then(Task<List> task) throws Exception {
                     final List<TodoItem> objects = task.getResult();
@@ -291,12 +318,19 @@ public class DataStoreManager {
 
     }
 
+    /**
+     * Returns created ArrayList from setItemList
+     * @return todoItemList
+     */
     public ArrayList<TodoItem> getTodoItemList(){
         return todoItemList;
     }
 
+    /**
+     * Sorts the list by case insensitive alphabetical order.
+     * @param theList is the list to be sorted.
+     */
     public void sortItems(List<TodoItem> theList) {
-        // Sort collection by case insensitive alphabetical order.
         Collections.sort(theList, new Comparator<TodoItem>() {
             public int compare(TodoItem lhs,
                                TodoItem rhs) {
@@ -307,8 +341,14 @@ public class DataStoreManager {
         });
     }
 
+    /**
+     * Pulls the objects from the remote store to the local store.
+     * @param waitForSync if 'true', method waits for sync to complete before returning.
+     * @return 'true' for success and 'false' if failed.
+     */
     public boolean doPullReplication(boolean waitForSync) {
         try{
+            // Had to create a new Runnable on UiThread in order for Toast to show up in background thread
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -341,14 +381,15 @@ public class DataStoreManager {
                         Log.e(CLASS_NAME, "Pull replication failed.  Error replicating to local.");
                         Log.e(CLASS_NAME, listener.error.toString());
                     }
-                    setItemList();
                 }
                 else {
                     replicator.start();
-                    setItemList();
                 }
+                // Create Array List from pulled down objects
+                setItemList();
             }
         } catch (Exception e) {
+            // Had to create a new Runnable on UiThread in order for Toast to show up in background thread
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -356,16 +397,20 @@ public class DataStoreManager {
                 }
             });
             // replication failed
-
             Log.e(CLASS_NAME, "Pull replication error", e);
             return false;
         }
         return true;
     }
 
+    /**
+     * Pushes the objects to the remote store from the local store.
+     * @param waitForSync if 'true', method waits for sync to complete before returning.
+     * @return 'true' for success and 'false' if failed.
+     */
     private boolean doPushReplication(boolean waitForSync) {
         try{
-
+            // Had to create a new Runnable on UiThread in order for Toast to show up in background thread
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -406,6 +451,7 @@ public class DataStoreManager {
                 }
             }
         } catch (Exception e) {
+            // Had to create a new Runnable on UiThread in order for Toast to show up in background thread
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -428,9 +474,7 @@ public class DataStoreManager {
         Log.i(CLASS_NAME, "Database replication started");
         repSuccess = doPullReplication(waitForSync);
         if (repSuccess){
-
             repSuccess = doPushReplication(waitForSync);
-
         }
         if (repSuccess) {
             setItemList();
@@ -443,6 +487,10 @@ public class DataStoreManager {
 
     }
 
+    /**
+     *
+     * @return
+     */
     public Store getTodosStore(){return todosStore;}
 
     /**
@@ -454,15 +502,27 @@ public class DataStoreManager {
         private final CountDownLatch latch;
         public ErrorInfo error = null;
 
+        /**
+         *
+         * @param latch
+         */
         Listener(CountDownLatch latch) {
             this.latch = latch;
         }
 
+        /**
+         *
+         * @param event
+         */
         @Subscribe
         public void complete(ReplicationCompleted event) {
             latch.countDown();
         }
 
+        /**
+         *
+         * @param event
+         */
         @Subscribe
         public void error(ReplicationErrored event) {
             this.error = event.errorInfo;

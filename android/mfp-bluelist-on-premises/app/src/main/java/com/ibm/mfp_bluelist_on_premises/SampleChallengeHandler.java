@@ -9,7 +9,7 @@ import com.worklight.wlclient.api.challengehandler.ChallengeHandler;
 import org.json.JSONException;
 
 /**
- * Created by drcariel on 3/12/2015.
+ *
  */
 public class SampleChallengeHandler extends ChallengeHandler {
     public String UserName;
@@ -17,10 +17,19 @@ public class SampleChallengeHandler extends ChallengeHandler {
     public String AdapterName;
     public String ScopeRealm;
 
+    /**
+     *
+     * @param realm
+     */
     public SampleChallengeHandler(String realm) {
         super(realm);
     }
 
+    /**
+     *
+     * @param response
+     * @return
+     */
     @Override
     public boolean isCustomResponse(WLResponse response) {
         try {
@@ -37,6 +46,10 @@ public class SampleChallengeHandler extends ChallengeHandler {
         return false;
     }
 
+    /**
+     *
+     * @param wlResponse
+     */
     @Override
     public void handleChallenge(WLResponse wlResponse) {
         Object[] parameters = new Object[]{UserName,UserPassword};
@@ -47,11 +60,19 @@ public class SampleChallengeHandler extends ChallengeHandler {
         submitAdapterAuthentication(invocationData, options);
     }
 
+    /**
+     *
+     * @param wlResponse
+     */
     @Override
     public void onSuccess(WLResponse wlResponse) {
         submitSuccess(wlResponse);
     }
 
+    /**
+     *
+     * @param wlFailResponse
+     */
     @Override
     public void onFailure(WLFailResponse wlFailResponse) {
         submitFailure(wlFailResponse);

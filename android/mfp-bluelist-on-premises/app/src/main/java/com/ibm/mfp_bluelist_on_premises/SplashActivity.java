@@ -7,12 +7,16 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 /**
- * Created by drcariel on 3/12/2015.
+ *
  */
 public class SplashActivity extends Activity {
 
     Activity splash;
 
+    /**
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -25,6 +29,9 @@ public class SplashActivity extends Activity {
 
     }
 
+    /**
+     *
+     */
     private class AsyncLoadDataManager extends AsyncTask<Void, Void, Void> {
 
         @Override
