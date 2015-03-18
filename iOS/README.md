@@ -58,4 +58,4 @@ Once the project is open please check and update the following items:
 
 Now we can run the sample on the simulators provided by Xcode or a supported iOS device.
 
-## For More Info on How to Run this Sample and How It Works See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-0/advanced-topics/cloudant-nosql-db-api/baham-ios-cloudant-nosql-db-api/)
+## For More Info on How to Run this Sample and How It Works See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-0/advanced-topics/cloudant-nosql-db-api/ios-cloudant-nosql-db-api/)
