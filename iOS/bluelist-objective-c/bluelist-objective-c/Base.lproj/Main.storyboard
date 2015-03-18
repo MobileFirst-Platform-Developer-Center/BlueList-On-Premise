@@ -27,6 +27,7 @@
                                         <segment title="Medium"/>
                                         <segment title="High"/>
                                     </segments>
+                                    <color key="tintColor" red="0.050980396568775177" green="0.39607846736907959" blue="0.54901963472366333" alpha="1" colorSpace="deviceRGB"/>
                                     <connections>
                                         <action selector="filterTable:" destination="TCR-es-Jf0" eventType="valueChanged" id="rrp-zB-NAC"/>
                                     </connections>
