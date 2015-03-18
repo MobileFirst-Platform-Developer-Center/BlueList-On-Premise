@@ -84,11 +84,6 @@ public class TodoItem implements DataObject {
         this.priority = Integer.getInteger(priority);
     }
 
-//    private Item (Parcel in) {
-//        name = in.readString();
-//        priority = Integer.getInteger(in.readString());
-//    }
-
     /**
      * Here for the mapper? TODO: Dont know if i need this
      * @return
@@ -105,26 +100,6 @@ public class TodoItem implements DataObject {
     public String toString() {
         return this.name + ": " + Integer.toString(priority);
     }
-
-//    public void writeToParcel(Parcel out, int flags) {
-//        out.writeString(name);
-//        out.writeString(Integer.toString(priority));
-//    }
-//
-//    public static final Parcelable.Creator<Item> CREATOR = new Parcelable.Creator<Item>() {
-//        public Item createFromParcel(Parcel in) {
-//            return new Item(in);
-//        }
-//
-//        public Item[] newArray(int size) {
-//            return new Item[size];
-//        }
-//
-//        //TODO This is needed for some reason
-//        public int getAnswerToTheUltimateQuestionOfLifeTheUniverseAndEverything(){
-//            return 42;
-//        }
-//    };
 
     /**
      * Grab the metadata stored in the TodoItem

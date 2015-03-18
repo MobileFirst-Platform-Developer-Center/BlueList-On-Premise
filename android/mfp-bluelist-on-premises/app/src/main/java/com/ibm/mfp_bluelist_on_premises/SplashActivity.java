@@ -7,16 +7,13 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 /**
- *
+ * The {@code SplashActivity} is the splash dialog shown when the app is created for the first time.
+ * During the splash, the DataStoreManager is created in a background task, which verifies authentication through the MFP server and connects to the remote datastore.
  */
 public class SplashActivity extends Activity {
 
     Activity splash;
 
-    /**
-     *
-     * @param savedInstanceState
-     */
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -24,13 +21,14 @@ public class SplashActivity extends Activity {
         setContentView(R.layout.activity_launch_screen);
 
         splash = this;
-
+        // Execute async task
         new AsyncLoadDataManager().execute();
 
     }
 
     /**
-     *
+     * Async task that creates DataStoreManager in a background thread.
+     * When complete, the MainActivity is created and the splash is dismissed.
      */
     private class AsyncLoadDataManager extends AsyncTask<Void, Void, Void> {
 

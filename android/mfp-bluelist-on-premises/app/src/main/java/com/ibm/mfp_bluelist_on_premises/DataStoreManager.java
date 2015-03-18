@@ -206,8 +206,9 @@ public class DataStoreManager {
             Log.e(CLASS_NAME, "Error setting data type for class", e);
         }
 
+        // To perform queries, you must create an index
         List<IndexField> indexFields = new ArrayList<IndexField>();
-        // TODO: Ask about this indexing
+
         indexFields.add(new IndexField("@datatype"));
 
         Task t = todosStore.createIndex(IndexName, indexFields);
@@ -243,7 +244,7 @@ public class DataStoreManager {
     }
 
     /**
-     *
+     * Sets the Context for the DataStore manager
      * @param context
      */
     public void setContext(Context context){
@@ -251,7 +252,7 @@ public class DataStoreManager {
     }
 
     /**
-     *
+     * Sets the activity for the DataStoreManager
      * @param activity needed for change from splash screen to MainActivity
      */
     public void setActivity(Activity activity){
@@ -488,8 +489,8 @@ public class DataStoreManager {
     }
 
     /**
-     *
-     * @return
+     * Returns the data Store containing TodoItem objects.
+     * @return Store with mapper.
      */
     public Store getTodosStore(){return todosStore;}
 
@@ -502,27 +503,15 @@ public class DataStoreManager {
         private final CountDownLatch latch;
         public ErrorInfo error = null;
 
-        /**
-         *
-         * @param latch
-         */
         Listener(CountDownLatch latch) {
             this.latch = latch;
         }
 
-        /**
-         *
-         * @param event
-         */
         @Subscribe
         public void complete(ReplicationCompleted event) {
             latch.countDown();
         }
 
-        /**
-         *
-         * @param event
-         */
         @Subscribe
         public void error(ReplicationErrored event) {
             this.error = event.errorInfo;

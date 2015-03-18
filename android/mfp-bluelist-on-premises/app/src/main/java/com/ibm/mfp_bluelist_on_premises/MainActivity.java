@@ -29,7 +29,7 @@ import bolts.Continuation;
 import bolts.Task;
 
 /**
- *
+ * The {@code MainActivity} is the primary visual activity shown when the app is being interacted with. Most of the code is UI and visuals.
  */
 public class MainActivity extends Activity {
 
@@ -73,7 +73,7 @@ public class MainActivity extends Activity {
     Activity main;
 
     /**
-     *
+     * Instantiate UI when activity starts
      * @param savedInstanceState
      */
     @Override
@@ -150,14 +150,14 @@ public class MainActivity extends Activity {
     }
 
     /**
-     *
+     * Update visual list using onToggle when filter has yet to be tapped
      */
     private void filterChange(){
         onToggle(findViewById(filters[filter]));
     }
 
     /**
-     *
+     * RefreshListener to implement pull down sync functionality for list
      */
     private SwipeRefreshLayout.OnRefreshListener RefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
 
@@ -273,17 +273,14 @@ public class MainActivity extends Activity {
     private AdapterView.OnItemLongClickListener deleteListener = new AdapterView.OnItemLongClickListener(){
         @Override
         public boolean onItemLongClick(android.widget.AdapterView <?> parent, View view, int position, long id) {
-            // If all Todo items are showing, remove from appropriate lists
 
             TodoItem todoItemToDelete = filterLists.get(filter).get(position);
 
             allList.remove(todoItemToDelete);
 
             filterLists.get(filter).remove(todoItemToDelete);
-
             // Remove the item in the list
             adapterList.remove(position);
-
             // Delete item from local store
             Store local = dsm.getTodosStore();
 
@@ -296,13 +293,11 @@ public class MainActivity extends Activity {
                         Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
 
                     }
-
                     // Log error message, if the delete task fails.
                     else if (task.isFaulted()) {
                         Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
 
                     }
-
                     // If the result succeeds, reload the list.
                     else {
 
@@ -358,7 +353,6 @@ public class MainActivity extends Activity {
                     hm.put("txt", toAdd);
                     // Create variable to store newly created Todo
                     TodoItem todoToAdd = null;
-                    // If "All" tab is selected set the priority to low
 
                     hm.put("priority", Integer.toString(priority[filter]));
 
@@ -422,7 +416,6 @@ public class MainActivity extends Activity {
         addDialog.setCancelable(true);
         // Need to populate text box with current todo text that the user wants to edit
         EditText et =(EditText) addDialog.findViewById(R.id.todo);
-
         // Grab text to change from array adapter hash list
         et.setText(adapterList.get(pos).get("txt"));
         // Create "Done" button for pop-up dialog
@@ -488,7 +481,7 @@ public class MainActivity extends Activity {
     }
 
     /**
-     *
+     * Populates arraylists for easier sorting and notifies the activity of a filter change to update the list
      */
     private void popLists(){
 
@@ -527,7 +520,6 @@ public class MainActivity extends Activity {
     public void priorityChange(View view){
         // Fetch position of item in list view
         Integer pos = lv.getPositionForView(view);
-        // If the "All" tab is selected
 
         ArrayList<TodoItem> listShowing = filterLists.get(filter);
 
@@ -571,15 +563,10 @@ public class MainActivity extends Activity {
     }
 
     /**
-     *
+     * Async task to run pull and push replication in a background thread
      */
     private class DataBaseSync extends AsyncTask<Void, Void, Void> {
 
-        /**
-         *
-         * @param voids
-         * @return
-         */
         @Override
         protected Void doInBackground(Void... voids){
 
@@ -587,10 +574,6 @@ public class MainActivity extends Activity {
             return null;
         }
 
-        /**
-         *
-         * @param params
-         */
         @Override
         protected void onPostExecute(Void params) {
 
