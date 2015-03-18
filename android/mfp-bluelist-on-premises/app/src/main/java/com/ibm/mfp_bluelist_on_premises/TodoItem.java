@@ -77,31 +77,6 @@ public class TodoItem implements DataObject {
     }
 
     /**
-     * Set priority is here for the mapper's use TODO: dont know if I need this
-     * @param priority String that will be converted to an integer
-     */
-    public void setPriority(String priority){
-        this.priority = Integer.getInteger(priority);
-    }
-
-    /**
-     * Here for the mapper? TODO: Dont know if i need this
-     * @return
-     */
-    public int describeContents() {
-        return 0;
-    }
-
-    /**
-     * TODO: Dont know if i need this
-     * @return
-     */
-    @Override
-    public String toString() {
-        return this.name + ": " + Integer.toString(priority);
-    }
-
-    /**
      * Grab the metadata stored in the TodoItem
      * @return Metadata object
      */
