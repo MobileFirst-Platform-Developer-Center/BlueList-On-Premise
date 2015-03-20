@@ -43,4 +43,4 @@ At this point, a browser will open and you should see the Worklight console.  Th
 
 4. Click "run" and watch as your app communicates with your Cloudant Local backend
 
-## For More Info on How to Run this Sample and How It Works See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-0/advanced-topics/cloudant-nosql-db-api/baham-android-cloudant-nosql-db-api/)
+## For More Info on How to Run this Sample and How It Works See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-0/advanced-topics/cloudant-nosql-db-api/android-cloudant-nosql-db-api/)
