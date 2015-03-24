@@ -19,18 +19,14 @@ public class BlueListChallengeHandler extends ChallengeHandler {
     public String AdapterName;
     public String ScopeRealm;
 
-    /**
-     *
-     * @param realm
-     */
     public BlueListChallengeHandler(String realm) {
         super(realm);
     }
 
     /**
-     *
-     * @param response
-     * @return
+     * Checks every custom response received from MobileFirst Server to see if that’s the challenge we are expecting.
+     * @param response The MobileFirst response.
+     * @return True if response contains an authRequired variable.
      */
     @Override
     public boolean isCustomResponse(WLResponse response) {
@@ -50,8 +46,8 @@ public class BlueListChallengeHandler extends ChallengeHandler {
     }
 
     /**
-     *
-     * @param wlResponse
+     * Used to log in after the appropriate response from the MobileFirst server.
+     * @param wlResponse The MobileFirst response.
      */
     @Override
     public void handleChallenge(WLResponse wlResponse) {
@@ -63,23 +59,14 @@ public class BlueListChallengeHandler extends ChallengeHandler {
         submitAdapterAuthentication(invocationData, options);
     }
 
-    /**
-     *
-     * @param wlResponse
-     */
     @Override
     public void onSuccess(WLResponse wlResponse) {
         submitSuccess(wlResponse);
     }
 
-    /**
-     *
-     * @param wlFailResponse
-     */
     @Override
     public void onFailure(WLFailResponse wlFailResponse) {
         submitFailure(wlFailResponse);
-
     }
 }
 
