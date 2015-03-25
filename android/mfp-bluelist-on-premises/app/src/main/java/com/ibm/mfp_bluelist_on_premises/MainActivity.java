@@ -508,7 +508,7 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPostExecute(Void params) {
-            popLists();
+            restoreLocalData();
             // Need to notify refresh spinner that replication has completed
             swipeLayout.setRefreshing(false);
         }
