@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
         // Create array to hold hash map
-        adapterList = new ArrayList<HashMap<String,String>>();
+        adapterList = new ArrayList<>();
         // Set list view from xml to variable
         lv = (ListView) findViewById(R.id.listView);
         // List of strings to identify string keys in hashmap
@@ -118,14 +118,14 @@ public class MainActivity extends Activity {
         dataStoreManager.setContext(getApplicationContext());
 
         // Initialize priority lists
-        mediumList = new ArrayList<TodoItem>();
-        highList = new ArrayList<TodoItem>();
+        mediumList = new ArrayList<>();
+        highList = new ArrayList<>();
 
         // Initialize all list
-        allList = new ArrayList<TodoItem>();
+        allList = new ArrayList<>();
 
         // Initialize filter lists
-        filterLists = new SparseArray<ArrayList<TodoItem>>();
+        filterLists = new SparseArray<>();
         filterLists.append(0, allList);
         filterLists.append(1, mediumList);
         filterLists.append(2, highList);
@@ -172,7 +172,7 @@ public class MainActivity extends Activity {
         if(tab.equals("All")){
             filter = 0;
             for(TodoItem todoItem : allList){
-                HashMap<String,String> hm = new HashMap<String, String>();
+                HashMap<String,String> hm = new HashMap<>();
                 hm.put("txt", todoItem.getName());
                 hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
@@ -183,7 +183,7 @@ public class MainActivity extends Activity {
         if(tab.equals("Medium")){
             filter = 1;
             for(TodoItem todoItem : mediumList){
-                HashMap<String,String> hm = new HashMap<String, String>();
+                HashMap<String,String> hm = new HashMap<>();
                 hm.put("txt", todoItem.getName());
                 hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
@@ -194,7 +194,7 @@ public class MainActivity extends Activity {
         if(tab.equals("High")){
             filter = 2;
             for(TodoItem todoItem : highList){
-                HashMap<String,String> hm = new HashMap<String, String>();
+                HashMap<String,String> hm = new HashMap<>();
                 hm.put("txt", todoItem.getName());
                 hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
@@ -305,13 +305,8 @@ public class MainActivity extends Activity {
                 String toAdd = itemToAdd.getText().toString();
                 // If text was added, continue with normal operations
                 if(!toAdd.isEmpty()) {
-                    // Add text to Visual list
-                    HashMap<String, String> hm = new HashMap<String, String>();
-                    hm.put("txt", toAdd);
-                    TodoItem todoToAdd = null;
-                    hm.put("priority", Integer.toString(priority[filter]));
                     // Create the new TodoItem
-                    todoToAdd = new TodoItem(toAdd, filter);
+                    TodoItem todoToAdd = new TodoItem(toAdd, filter);
                     // Save new TodoItem to local store
                     Store store = dataStoreManager.getTodosStore();
                     store.save(todoToAdd).continueWith(new Continuation<Object, Void>() {
