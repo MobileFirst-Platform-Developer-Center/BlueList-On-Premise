@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.util.SparseArray;
@@ -164,16 +163,6 @@ public class MainActivity extends Activity {
         @Override
         public void onRefresh() {
             new DataBaseSync().execute();
-
-            //TODO: Is this done correctly? Can I do this more accurately?
-            new Handler().postDelayed(new Runnable() {
-
-                @Override
-                public void run() {
-
-                    swipeLayout.setRefreshing(false);
-                }
-            }, 4500);
         }
     };
 
@@ -569,15 +558,15 @@ public class MainActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... voids){
-
             dsm.sync(true);
             return null;
         }
 
         @Override
         protected void onPostExecute(Void params) {
-
             popLists();
+            // Need to notify refresh spinner that replication has completed
+            swipeLayout.setRefreshing(false);
         }
     }
 
