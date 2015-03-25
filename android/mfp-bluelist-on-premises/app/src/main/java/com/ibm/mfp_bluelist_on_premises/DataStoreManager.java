@@ -47,7 +47,7 @@ public class DataStoreManager {
     private static DataStoreManager instance = null;
 
     /**
-     * Default property values used if Bluelist.properties is not set. DO I need this?
+     * Default property values used if Bluelist.properties is not set.
      */
     private static String DEFAULT_CLOUDANT_PROXY_URL = "http://10.0.2.2:9080/imfdata";
     private static String DEFAULT_DBName = "todosdb";
