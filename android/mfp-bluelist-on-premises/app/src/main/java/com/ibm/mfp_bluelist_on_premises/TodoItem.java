@@ -22,15 +22,6 @@ public class TodoItem implements DataObject {
     }
 
     /**
-     * Constructor that sets the name and default priority
-     * @param name String name of the TodoItem
-     */
-    public TodoItem(String name){
-        this.name = name;
-        this.priority = 0;
-    }
-
-    /**
      * Constructor that sets the name and priority
      * @param name String name of the TodoItem
      * @param priority Integer priority for TodoItem

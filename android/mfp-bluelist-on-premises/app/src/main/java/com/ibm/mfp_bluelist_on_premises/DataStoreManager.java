@@ -88,7 +88,7 @@ public class DataStoreManager {
 
     protected DataStoreManager(Context context, Activity activity){
 
-        todoItemList = new ArrayList<TodoItem>();
+        todoItemList = new ArrayList<>();
         this.activity = activity;
         this.context = context;
 
@@ -205,7 +205,7 @@ public class DataStoreManager {
         }
 
         // To perform queries, you must create an index
-        List<IndexField> indexFields = new ArrayList<IndexField>();
+        List<IndexField> indexFields = new ArrayList<>();
         indexFields.add(new IndexField("@datatype"));
         Task t = todosStore.createIndex(IndexName, indexFields);
         try {
@@ -237,7 +237,7 @@ public class DataStoreManager {
 
     /**
      * Sets the Context for the DataStore manager
-     * @param context
+     * @param context current activity context
      */
     public void setContext(Context context){
         this.context = context;
@@ -266,9 +266,9 @@ public class DataStoreManager {
 
 
         try {
-            Map<String, Object> queryJSON = new HashMap<String, Object>();
-            Map<String, Object> selector = new HashMap<String, Object>();
-            Map<String, Object> equalityOp = new HashMap<String, Object>();
+            Map<String, Object> queryJSON = new HashMap<>();
+            Map<String, Object> selector = new HashMap<>();
+            Map<String, Object> equalityOp = new HashMap<>();
             equalityOp.put("$eq", "TodoItem");
             selector.put("@datatype", equalityOp);
             queryJSON.put("selector", selector);
@@ -295,7 +295,7 @@ public class DataStoreManager {
                         todoItemList.clear();
                         // We'll be reordering and repopulating from DataService.
                         for(TodoItem todoItem :objects) {
-                            todoItemList.add((TodoItem) todoItem);
+                            todoItemList.add(todoItem);
                         }
                         sortItems(todoItemList);
                     }
@@ -463,7 +463,7 @@ public class DataStoreManager {
      * @param waitForSync if 'true', method waits for sync to complete before returning
      */
     public void sync(boolean waitForSync) {
-        boolean repSuccess = false;
+        boolean repSuccess;
         Log.i(CLASS_NAME, "Database replication started");
         repSuccess = doPullReplication(waitForSync);
         if (repSuccess){
