@@ -89,9 +89,7 @@ public class DataStoreManager {
     protected DataStoreManager(Context context, Activity activity){
 
         todoItemList = new ArrayList<TodoItem>();
-
         this.activity = activity;
-
         this.context = context;
 
         Properties props = new java.util.Properties();
@@ -208,25 +206,19 @@ public class DataStoreManager {
 
         // To perform queries, you must create an index
         List<IndexField> indexFields = new ArrayList<IndexField>();
-
         indexFields.add(new IndexField("@datatype"));
-
         Task t = todosStore.createIndex(IndexName, indexFields);
-
         try {
             t.waitForCompletion();
         } catch (InterruptedException e2) {
             Log.e(CLASS_NAME, "Interrupted waiting for creation of index", e2);
         }
-
         if (t.isFaulted()) {
             Log.e(CLASS_NAME, "Error creating index", t.getError());
         }
 
         doPullReplication(true);
-
         setItemList();
-
     }
 
     /**
@@ -297,8 +289,6 @@ public class DataStoreManager {
                     else if (task.isFaulted()) {
                         Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
                     }
-
-
                     // If the result succeeds, load the list.
                     else {
                         // Clear local itemList.
@@ -397,6 +387,7 @@ public class DataStoreManager {
                     Toast.makeText(context, "Error replicating with Cloudant", Toast.LENGTH_SHORT).show();
                 }
             });
+
             // replication failed
             Log.e(CLASS_NAME, "Pull replication error", e);
             return false;
@@ -459,6 +450,7 @@ public class DataStoreManager {
                     Toast.makeText(context, "Error replicating with Cloudant", Toast.LENGTH_LONG).show();
                 }
             });
+
             // replication failed
             Log.e(CLASS_NAME, "Push replication error", e);
             return false;

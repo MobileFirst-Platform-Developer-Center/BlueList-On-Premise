@@ -61,11 +61,9 @@ public class TodoItem implements DataObject {
      */
     public void priorityCycle(){
         priority++;
-
         if(priority > 2){
             priority = 0;
         }
-
     }
 
     /**

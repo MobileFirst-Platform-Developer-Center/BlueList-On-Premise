@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
 
     // Need filter value to know what and where to add items, basically maintains state of list view
     private Integer filter;
-    // List of all todo objects
+    // List of all TodoItem objects
     private ArrayList<TodoItem> allList;
     // Main List View
     private ListView lv;
@@ -46,9 +46,9 @@ public class MainActivity extends Activity {
     private SimpleAdapter simpleAdapter;
     // List of Hash pairs (DESCRIPTOR, VALUE), used for UI specific listing of image and text
     private List<HashMap<String,String>> adapterList;
-    // Maintains list of medium priority todos
+    // Maintains list of medium priority TodoItems
     private ArrayList<TodoItem> mediumList;
-    // Maintains list of high priority todos
+    // Maintains list of high priority TodoItems
     private ArrayList<TodoItem> highList;
 
     // List of priority src images
@@ -64,23 +64,18 @@ public class MainActivity extends Activity {
             R.id.button2,
             R.id.button3,
     };
-
+    // Sparse Array to easily keep track and reference different priority lists
     private SparseArray<ArrayList<TodoItem>> filterLists;
     // Data Store Manager singleton to manipulate local store and get updated lists
-    private DataStoreManager dsm;
+    private DataStoreManager dataStoreManager;
     // Need to save activity to pass to DataStore Manager so Toasts can be called at appropriate times
     Activity main;
 
-    /**
-     * Instantiate UI when activity starts
-     * @param savedInstanceState
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
         // Create array to hold hash map
         adapterList = new ArrayList<HashMap<String,String>>();
         // Set list view from xml to variable
@@ -97,90 +92,67 @@ public class MainActivity extends Activity {
         lv.setOnItemLongClickListener(deleteListener);
         // Create radio/toggle tabs above the list View for filtering
         ((RadioGroup) findViewById(R.id.toggleGroup)).setOnCheckedChangeListener(ToggleListener);
-        // Grab Swiperefresh Layout
+        // Grab Swipe Refresh Layout
         swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
-        // Set swipe refresh listener for sync on pulldown of the list
+        // Set color scheme for swipe refresh listener
+        swipeLayout.setColorSchemeResources(R.color.white, R.color.black, R.color.light_blue);
+        // Set swipe refresh listener for sync on pull-down of the list
         swipeLayout.setOnRefreshListener(RefreshListener);
+        // Could not get getResources().getColor to work, I believe there is a bug in that code, but this works
+        swipeLayout.setProgressBackgroundColor(R.color.blue);
 
         main = this;
 
-        if(savedInstanceState!=null && savedInstanceState.containsKey("allData") && savedInstanceState.containsKey("mediumData") && savedInstanceState.containsKey("highData")){
-
-            //TODO: Am I able to handle rotation at the moment? Does the DataStoreManager singleton stick around?
-//            allList = savedInstanceState.getParcelableArrayList("allData");
-//            mediumList = savedInstanceState.getParcelableArrayList("mediumData");
-//            highList = savedInstanceState.getParcelableArrayList("highData");
-
+        if(savedInstanceState!=null && savedInstanceState.containsKey("filter")){
             // Set filter to currently selected tab
             filter = savedInstanceState.getInt("filter");
-
-            popLists();
         }
         else {
-
-            dsm = DataStoreManager.getInstance(getApplicationContext(), main);
-
-            dsm.setActivity(main);
-
-            dsm.setContext(getApplicationContext());
-
-            // Initialize priority lists
-            mediumList = new ArrayList<TodoItem>();
-            highList = new ArrayList<TodoItem>();
-
-            // Initialize all list
-            allList = new ArrayList<TodoItem>();
-
-            filterLists = new SparseArray<ArrayList<TodoItem>>();
-
-            filterLists.append(0, allList);
-            filterLists.append(1, mediumList);
-            filterLists.append(2, highList);
-
             // Set default filter to "All"
             filter = 0;
-
-            allList.addAll(dsm.getTodoItemList());
-
-            popLists();
-
         }
 
-    }
+        // Grab DataStoreManager and update context and activity after splash screen
+        dataStoreManager = DataStoreManager.getInstance(getApplicationContext(), main);
+        dataStoreManager.setActivity(main);
+        dataStoreManager.setContext(getApplicationContext());
 
-    /**
-     * Update visual list using onToggle when filter has yet to be tapped
-     */
-    private void filterChange(){
-        onToggle(findViewById(filters[filter]));
+        // Initialize priority lists
+        mediumList = new ArrayList<TodoItem>();
+        highList = new ArrayList<TodoItem>();
+
+        // Initialize all list
+        allList = new ArrayList<TodoItem>();
+
+        // Initialize filter lists
+        filterLists = new SparseArray<ArrayList<TodoItem>>();
+        filterLists.append(0, allList);
+        filterLists.append(1, mediumList);
+        filterLists.append(2, highList);
+
+        // Called initially to populate UI lists
+        restoreLocalData();
     }
 
     /**
      * RefreshListener to implement pull down sync functionality for list
      */
     private SwipeRefreshLayout.OnRefreshListener RefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
-
         @Override
         public void onRefresh() {
+            // Async task
             new DataBaseSync().execute();
         }
     };
 
     /**
-     *
-     * @param savedInstanceState
+     * Maintain state on activity destroyed, basically just maintaining the filter state
+     * @param savedInstanceState the saved state
      */
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState){
-
-//        savedInstanceState.putParcelableArrayList("allData", allList);
-//        savedInstanceState.putParcelableArrayList("mediumData", mediumList);
-//        savedInstanceState.putParcelableArrayList("highData", highList);
-
         savedInstanceState.putInt("filter", filter);
-
         super.onSaveInstanceState(savedInstanceState);
-
     }
 
     /**
@@ -195,44 +167,38 @@ public class MainActivity extends Activity {
         String tab = tv.getText().toString();
         // Clear the list
         adapterList.clear();
+
         // If the "All" button is toggled, clear the list in the adapter and populate it with all the values from storage.
         if(tab.equals("All")){
-
             filter = 0;
-
             for(TodoItem todoItem : allList){
                 HashMap<String,String> hm = new HashMap<String, String>();
                 hm.put("txt", todoItem.getName());
                 hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
             }
-
         }
+
         // If the "Medium" button is toggled, clear the list in the adapter and populate it with all the values with priority 1 (medium) from storage.
         if(tab.equals("Medium")){
-
             filter = 1;
-
             for(TodoItem todoItem : mediumList){
                 HashMap<String,String> hm = new HashMap<String, String>();
                 hm.put("txt", todoItem.getName());
                 hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
             }
-
         }
+
         // If the "High" button is toggled, clear the list in the adapter and populate it with all the values with priority 2 (high) from storage.
         if(tab.equals("High")){
-
             filter = 2;
-
             for(TodoItem todoItem : highList){
                 HashMap<String,String> hm = new HashMap<String, String>();
                 hm.put("txt", todoItem.getName());
                 hm.put("priority", Integer.toString(priority[todoItem.getPriority()]));
                 adapterList.add(hm);
             }
-
         }
         // Must inform the adapter whenever the data set has changed or else the appropriate data will not be displayed.
         simpleAdapter.notifyDataSetChanged();
@@ -257,22 +223,30 @@ public class MainActivity extends Activity {
     };
 
     /**
+     * Restores and populates UI lists when a save, add, or delete fails to be consistent with local data store.
+     */
+    private void restoreLocalData(){
+        allList.clear();
+        allList.addAll(dataStoreManager.getTodoItemList());
+        popLists();
+    }
+
+    /**
      * Long click listener for each item in the listView for delete functionality
      */
     private AdapterView.OnItemLongClickListener deleteListener = new AdapterView.OnItemLongClickListener(){
         @Override
         public boolean onItemLongClick(android.widget.AdapterView <?> parent, View view, int position, long id) {
-
+            // Grab TodoItem to delete from current showing list
             TodoItem todoItemToDelete = filterLists.get(filter).get(position);
-
+            // Remove from all List
             allList.remove(todoItemToDelete);
-
+            // Remove from currently showing list
             filterLists.get(filter).remove(todoItemToDelete);
-            // Remove the item in the list
+            // Remove the item in the actual visual list
             adapterList.remove(position);
             // Delete item from local store
-            Store local = dsm.getTodosStore();
-
+            Store local = dataStoreManager.getTodosStore();
             local.delete(todoItemToDelete).continueWith(new Continuation<String, Void>() {
 
                 @Override
@@ -280,24 +254,23 @@ public class MainActivity extends Activity {
                     // Log if the delete was cancelled.
                     if (task.isCancelled()){
                         Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
-
+                        // sync UI back with local store
+                        restoreLocalData();
                     }
                     // Log error message, if the delete task fails.
                     else if (task.isFaulted()) {
                         Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
-
+                        // sync UI back with local store
+                        restoreLocalData();
                     }
                     // If the result succeeds, reload the list.
                     else {
-
                         popLists();
-
                         Log.i("STORE_CHANGE:","Item deleted from local store " + task.getResult());
                     }
                     return null;
                 }
             },Task.UI_THREAD_EXECUTOR);
-
             return true;
         }
     };
@@ -310,45 +283,37 @@ public class MainActivity extends Activity {
      * @param view The list item that is tapped.
      */
     public void addTodo(View view){
-        //Create dialog pop-up
+        // Create dialog pop-up
         final Dialog addDialog = new Dialog(this);
-        // Set dialog to appropriate xml layout
+
+        // Set dialog configuration and show
         addDialog.setContentView(R.layout.add_edit_dialog);
         addDialog.setTitle("Add Todo");
         TextView textView = (TextView) addDialog.findViewById(android.R.id.title);
-        if(textView != null)
-        {
+        if(textView != null) {
             textView.setGravity(Gravity.CENTER);
         }
-        //Allow user to cancel by tapping outside of dialog or pressing back button (Did not implement a cancel button)
         addDialog.setCancelable(true);
-        // Create done button in dialog
         Button add =(Button) addDialog.findViewById(R.id.Add);
-        // Show dialog
         addDialog.show();
+
         // Set on click listener for done button to grab text entered by user and create a new list object
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Grab text box
                 EditText itemToAdd =(EditText) addDialog.findViewById(R.id.todo);
-                // Grab user inputted text
                 String toAdd = itemToAdd.getText().toString();
                 // If text was added, continue with normal operations
                 if(!toAdd.isEmpty()) {
-                    // Create new HashMap
+                    // Add text to Visual list
                     HashMap<String, String> hm = new HashMap<String, String>();
-                    // Set text to user inputted text
                     hm.put("txt", toAdd);
-                    // Create variable to store newly created Todo
                     TodoItem todoToAdd = null;
-
                     hm.put("priority", Integer.toString(priority[filter]));
-
+                    // Create the new TodoItem
                     todoToAdd = new TodoItem(toAdd, filter);
-
-                    Store store = dsm.getTodosStore();
-
+                    // Save new TodoItem to local store
+                    Store store = dataStoreManager.getTodosStore();
                     store.save(todoToAdd).continueWith(new Continuation<Object, Void>() {
 
                         @Override
@@ -356,28 +321,26 @@ public class MainActivity extends Activity {
                             // Log if the save was cancelled.
                             if (task.isCancelled()) {
                                 Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
-
+                                // sync UI back with local store
+                                restoreLocalData();
                             }
                             // Log error message, if the save task fails.
                             else if (task.isFaulted()) {
-
                                 Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
-
+                                // sync UI back with local store
+                                restoreLocalData();
                             }
 
-                            // If the result succeeds, load the list.
+                            // If the result succeeds, add the new TodoItem and load the list.
                             else {
                                 allList.add((TodoItem) task.getResult());
-
                                 popLists();
-
                                 Log.i("STORE_CHANGE:","Item added to local store " + task.getResult());
                             }
                             return null;
                         }
 
                     });
-
                 }
                 // Kill dialog when finished, or if no text was added
                 addDialog.dismiss();
@@ -394,7 +357,7 @@ public class MainActivity extends Activity {
         final Integer pos = lv.getPositionForView(view);
         // Same dialog creation as add, just change the title
         final Dialog addDialog = new Dialog(this);
-        // Set dialog to appropriate xml layout
+        // Set dialog config and show
         addDialog.setContentView(R.layout.add_edit_dialog);
         addDialog.setTitle("Edit Todo");
         TextView textView = (TextView) addDialog.findViewById(android.R.id.title);
@@ -403,36 +366,28 @@ public class MainActivity extends Activity {
             textView.setGravity(Gravity.CENTER);
         }
         addDialog.setCancelable(true);
-        // Need to populate text box with current todo text that the user wants to edit
         EditText et =(EditText) addDialog.findViewById(R.id.todo);
         // Grab text to change from array adapter hash list
         et.setText(adapterList.get(pos).get("txt"));
-        // Create "Done" button for pop-up dialog
         Button addDone =(Button) addDialog.findViewById(R.id.Add);
-        // Show dialog
         addDialog.show();
-        // Set on click listener for dialog
+        // Set on click listener for done button to save edited text and TodoItem
         addDone.setOnClickListener(new View.OnClickListener() {
             // Save text inputted when done is tapped
             @Override
             public void onClick(View view) {
-                // Grab the edit text box
                 EditText editedText = (EditText) addDialog.findViewById(R.id.todo);
                 // Grab newly edited text from the edit text box
                 String newText = editedText.getText().toString();
-                // Make sure there is text in the Edit Text box
+                // If text is there, continue with normal operations
                 if (!newText.isEmpty()) {
-
+                    // remove the TodoItem from main list and update the name
                     ArrayList<TodoItem> listShowing = filterLists.get(filter);
-
                     TodoItem toEdit = listShowing.get(pos);
-
                     allList.remove(toEdit);
-
                     toEdit.setName(newText);
-
-                    Store store = dsm.getTodosStore();
-
+                    // Save edited TodoItem in local store
+                    Store store = dataStoreManager.getTodosStore();
                     store.save(toEdit).continueWith(new Continuation<Object, Void>() {
 
                         @Override
@@ -440,29 +395,27 @@ public class MainActivity extends Activity {
                             // Log if the save was cancelled.
                             if (task.isCancelled()) {
                                 Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
-
+                                // sync UI back with local store
+                                restoreLocalData();
                             }
                             // Log error message, if the save task fails.
                             else if (task.isFaulted()) {
-
                                 Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
-
+                                // sync UI back with local store
+                                restoreLocalData();
                             }
 
-                            // If the result succeeds, load the list.
+                            // If the result succeeds, add the newly updated TodoItem and load the list.
                             else {
+                                // WARNING: Do not use the same object you passed into the store after you save the update. Always use the new object from task.getResult() to avoid errors and inconsistencies
                                 allList.add((TodoItem) task.getResult());
-
                                 popLists();
-
                                 Log.i("STORE_CHANGE:","Item edited in local store " + task.getResult());
-
                             }
                             return null;
                         }
 
                        });
-
                 }
                 addDialog.dismiss();
             }
@@ -470,12 +423,12 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Populates arraylists for easier sorting and notifies the activity of a filter change to update the list
+     * Populates array lists for easier sorting and notifies the activity of a filter change to update the list
      */
     private void popLists(){
 
         if(allList!=null){
-            dsm.sortItems(allList);
+            dataStoreManager.sortItems(allList);
             mediumList.clear();
             highList.clear();
             for(TodoItem todoItem :allList){
@@ -493,7 +446,8 @@ public class MainActivity extends Activity {
             filterLists.append(1, mediumList);
             filterLists.append(2, highList);
 
-            filterChange();
+            // Update visual list using onToggle when filter has yet to be tapped
+            onToggle(findViewById(filters[filter]));
 
         }
 
@@ -509,17 +463,15 @@ public class MainActivity extends Activity {
     public void priorityChange(View view){
         // Fetch position of item in list view
         Integer pos = lv.getPositionForView(view);
-
         ArrayList<TodoItem> listShowing = filterLists.get(filter);
-
         TodoItem toUpdate = listShowing.get(pos);
-
+        // remove from all list
         allList.remove(toUpdate);
-
+        // Update priority
         toUpdate.priorityCycle();
 
-        Store store = dsm.getTodosStore();
-
+        // Save edited TodoItem in local store
+        Store store = dataStoreManager.getTodosStore();
         store.save(toUpdate).continueWith(new Continuation<Object, Void>() {
 
             @Override
@@ -527,25 +479,22 @@ public class MainActivity extends Activity {
                 // Log if the save was cancelled.
                 if (task.isCancelled()) {
                     Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
-
+                    // sync UI back with local store
+                    restoreLocalData();
                 }
                 // Log error message, if the save task fails.
                 else if (task.isFaulted()) {
-
                     Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
-
+                    // sync UI back with local store
+                    restoreLocalData();
                 }
-
                 // If the result succeeds, load the list.
                 else {
                    allList.add((TodoItem) task.getResult());
-
                     Log.i("STORE_CHANGE:","Item edited in local store " + task.getResult());
-
                     popLists();
                 }
                 return null;
-
             }
 
         });
@@ -558,7 +507,7 @@ public class MainActivity extends Activity {
 
         @Override
         protected Void doInBackground(Void... voids){
-            dsm.sync(true);
+            dataStoreManager.sync(true);
             return null;
         }
 

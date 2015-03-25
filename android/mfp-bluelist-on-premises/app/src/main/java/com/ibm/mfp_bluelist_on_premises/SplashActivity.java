@@ -17,9 +17,7 @@ public class SplashActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_launch_screen);
-
         splash = this;
         // Execute async task
         new AsyncLoadDataManager().execute();
@@ -34,22 +32,17 @@ public class SplashActivity extends Activity {
 
         @Override
         protected void onPreExecute(){
-
             Toast.makeText(getBaseContext(), "LOADING DATA", Toast.LENGTH_SHORT).show();
-
         }
 
         @Override
         protected Void doInBackground(Void... voids){
-
             DataStoreManager.getInstance(getApplicationContext(), splash);
-
             return null;
         }
 
         @Override
         protected void onPostExecute(Void params){
-
             // dismiss the dialog
             // launch the Main activity
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
