@@ -10,15 +10,17 @@
             <objects>
                 <tableViewController id="TCR-es-Jf0" customClass="TableViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="49" sectionHeaderHeight="22" sectionFooterHeight="22" id="mqW-hD-dwa">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="tintColor" red="0.0" green="0.39215686274509803" blue="0.55294117647058827" alpha="1" colorSpace="custom" customColorSpace="adobeRGB1998"/>
+                        <color key="sectionIndexTrackingBackgroundColor" red="0.050980396568775177" green="0.39607846736907959" blue="0.54901963472366333" alpha="1" colorSpace="deviceRGB"/>
                         <view key="tableHeaderView" contentMode="scaleToFill" id="bjh-3M-n2e">
                             <rect key="frame" x="0.0" y="64" width="600" height="54"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <subviews>
-                                <segmentedControl opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="GCI-R1-5xU">
-                                    <rect key="frame" x="184" y="13" width="244" height="27"/>
+                                <segmentedControl opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="GCI-R1-5xU" userLabel="All , Medium, High">
+                                    <rect key="frame" x="184" y="13" width="244" height="29"/>
                                     <constraints>
                                         <constraint firstAttribute="width" constant="235" id="BNx-ov-yex"/>
                                     </constraints>
@@ -27,7 +29,7 @@
                                         <segment title="Medium"/>
                                         <segment title="High"/>
                                     </segments>
-                                    <color key="tintColor" red="0.050980396568775177" green="0.39607846736907959" blue="0.54901963472366333" alpha="1" colorSpace="deviceRGB"/>
+                                    <color key="tintColor" red="0.0039215686274509803" green="0.39215686274509803" blue="0.55686274509803924" alpha="1" colorSpace="calibratedRGB"/>
                                     <connections>
                                         <action selector="filterTable:" destination="TCR-es-Jf0" eventType="valueChanged" id="rrp-zB-NAC"/>
                                     </connections>
@@ -46,7 +48,7 @@
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="iIy-Kx-Kl2" id="czd-zR-amp">
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="HED-WL-uTm">
+                                        <textField opaque="NO" clipsSubviews="YES" tag="3" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="HED-WL-uTm">
                                             <rect key="frame" x="61" y="-1" width="525" height="49"/>
                                             <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="16"/>
                                             <textInputTraits key="textInputTraits" returnKeyType="done"/>
@@ -94,10 +96,11 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="kqP-LC-RND" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" barStyle="black" id="zy4-dv-NDX">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" barStyle="black" translucent="NO" id="zy4-dv-NDX">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
-                        <color key="barTintColor" red="0.0" green="0.3921568627" blue="0.55294117649999996" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="barTintColor" red="0.0039215686274509803" green="0.39215686274509803" blue="0.55686274509803924" alpha="1" colorSpace="calibratedRGB"/>
                         <textAttributes key="titleTextAttributes">
                             <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="24"/>
                         </textAttributes>
@@ -112,4 +115,5 @@
             <point key="canvasLocation" x="864" y="136"/>
         </scene>
     </scenes>
+    <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
 </document>
