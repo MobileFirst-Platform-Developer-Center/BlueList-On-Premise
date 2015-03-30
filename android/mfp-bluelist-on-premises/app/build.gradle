@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
     compile(name: 'worklight-android', ext: 'jar')
-    compile 'com.ibm.mobile.services:imfdata-local:0.1.0-20150219-1231'
-    compile 'com.ibm.mobile.services:cloudant-toolkit-local:0.1.0-20150219-1231'
+    compile 'com.ibm.mobile.services:imfdata-local:1.0.0'
+    compile 'com.ibm.mobile.services:cloudant-toolkit-local:1.0.0'
     compile 'com.android.support:appcompat-v7:21.0.3'
 }
