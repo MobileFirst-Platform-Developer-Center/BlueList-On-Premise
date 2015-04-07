@@ -45,11 +45,11 @@ Setup CocoaPods using the following terminal command:
 
 `$ pod setup`
 
-The next step is to download and install the required dependencies for this project using the Podfile that has been provided. Navigate to the Xcode project directory in terminal (/mfp-bluelist-on-premises/iOS/objective-c/ in the sample provided) and run the following command:
+The next step is to download and install the required dependencies for this project using the Podfile that has been provided. Navigate to the Xcode project directory in terminal (/mfp-bluelist-on-premises/iOS/bluelist-objective-c/ or /mfp-bluelist-on-premises/iOS/bluelist-swift/ in the sample provided) and run the following command:
 
 `$ pod install`
 
-After the dependencies have been installed open the bluelist-objective-c.xcworkspace. When using CocoaPods you must use the .xcworkspace instead of the .xcodeproject file because of how the dependencies are configured.
+After the dependencies have been installed open the bluelist-objective-c.xcworkspace or bluelist-swift.xcworkspace. When using CocoaPods you must use the .xcworkspace instead of the .xcodeproject file because of how the dependencies are configured.
 
 Once the project is open please check and update the following items:
 
