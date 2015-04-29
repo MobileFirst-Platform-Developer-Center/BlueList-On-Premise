@@ -31,7 +31,7 @@ class BlueListChallengeHandler: ChallengeHandler {
         println(response.getResponseJson())
         if (response != nil && response.getResponseJson() != nil) {
             var responseJSON = response.getResponseJson() as NSDictionary
-            var authRequired = responseJSON.objectForKey("authRequired") as Bool?
+            var authRequired = responseJSON.objectForKey("authRequired") as! Bool?
             if authRequired != nil {
                 return authRequired!
             }

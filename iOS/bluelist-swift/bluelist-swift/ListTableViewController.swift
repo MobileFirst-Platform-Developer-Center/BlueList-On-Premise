@@ -78,7 +78,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         let configurationPath = NSBundle.mainBundle().pathForResource("bluelist", ofType: "plist")
         if((configurationPath) != nil){
             let configuration = NSDictionary(contentsOfFile: configurationPath!)
-            cloudantProxyURL = configuration?["cloudantProxyUrl"] as String
+            cloudantProxyURL = configuration?["cloudantProxyUrl"] as! String
             if(cloudantProxyURL.isEmpty){
                  hasValidConfiguration = false
                  NSLog("%@", "Open the bluelist.plist and set the cloudantProxyUrl");
@@ -88,7 +88,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         if(hasValidConfiguration){
         var error:NSError?
         let manager:IMFDataManager = IMFDataManager.initializeWithUrl(cloudantProxyURL)
-        self.datastore = manager.localStore(dbName, error: &error)
+        self.datastore = manager.localStore(dbName as String, error: &error)
         if ((error) != nil) {
             NSLog("%@", "Could not create local data store");
         }
@@ -105,18 +105,18 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
 
             }
          //Create remote data store
-            manager.remoteStore(dbName, completionHandler: { (store, error) -> Void in
+            manager.remoteStore(dbName as String, completionHandler: { (store, error) -> Void in
                 if (error != nil) {  NSLog("%@","Error creating remote data store \(error)")
                     }
                     else {
                     NSLog("%@","Created remote data store successfully")
                         self.remoteStore = store
-                        manager.setCurrentUserPermissions(DB_ACCESS_GROUP_MEMBERS, forStoreName: dbName, completionHander: { (success, error) -> Void in
+                        manager.setCurrentUserPermissions(DB_ACCESS_GROUP_MEMBERS, forStoreName: dbName as String, completionHander: { (success, error) -> Void in
                             if (error != nil) {
                             }
                             self.replicatorFactory = manager.replicatorFactory
-                            self.pullReplication = manager.pullReplicationForStore(dbName)
-                            self.pushReplication = manager.pushReplicationForStore(dbName)
+                            self.pullReplication = manager.pullReplicationForStore(dbName as String)
+                            self.pushReplication = manager.pushReplicationForStore(dbName as String)
                             self.pullItems()
                         })
                 }
@@ -136,7 +136,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
                 if((error) != nil) {
                 }
                 else{
-                    self.itemList = results as [TodoItem]
+                    self.itemList = results as! [TodoItem]
                     self.reloadLocalTableData()
                 }
                 cb()
@@ -284,18 +284,18 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
-            let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell", forIndexPath: indexPath) as UITableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell", forIndexPath: indexPath) as! UITableViewCell
             let item = self.filteredListItems[indexPath.row] as TodoItem
             
             // Configure the cell
             cell.imageView?.image = self.getPriorityImage(item.priority.integerValue)
-            let textField = cell.contentView.viewWithTag(3) as UITextField
+            let textField = cell.contentView.viewWithTag(3) as! UITextField
             textField.hidden = false
-            textField.text = item.name
+            textField.text = item.name as String
             cell.contentView.tag = 0
             return cell
         } else {
-            let cell = tableView.dequeueReusableCellWithIdentifier("AddCell", forIndexPath: indexPath) as UITableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier("AddCell", forIndexPath: indexPath) as! UITableViewCell
             cell.contentView.tag = 1
             return cell
         }
@@ -426,7 +426,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     }
     
     func updateItemFromtextField(textField: UITextField) {
-        let cell = textField.superview?.superview as UITableViewCell
+        let cell = textField.superview?.superview as! UITableViewCell
         let indexPath = self.tableView.indexPathForCell(cell)
         var item = self.filteredListItems[indexPath!.row]
         item.name = textField.text
@@ -445,7 +445,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     func reloadLocalTableData() {
         self.filterContentForPriority(scope: self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
         self.filteredListItems.sort { (item1: TodoItem, item2: TodoItem) -> Bool in
-            return item1.name.localizedCaseInsensitiveCompare(item2.name) == .OrderedAscending
+            return item1.name.localizedCaseInsensitiveCompare(item2.name as String) == .OrderedAscending
         }
         if self.tableView != nil {
             self.tableView.reloadData()
