@@ -51,6 +51,8 @@ The next step is to download and install the required dependencies for this proj
 
 After the dependencies have been installed open the bluelist-objective-c.xcworkspace or bluelist-swift.xcworkspace. When using CocoaPods you must use the .xcworkspace instead of the .xcodeproject file because of how the dependencies are configured.
 
+NOTE: For the Swift sample you must run and compile the application on the latest version of Xcode.
+
 Once the project is open please check and update the following items:
 
 - In the bluelist.plist file set the cloudantProxyUrl to your MobileFirst Data Proxy Server location.
