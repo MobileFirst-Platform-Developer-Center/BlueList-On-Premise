@@ -18,8 +18,8 @@
 #import <CloudantToolkit/CloudantToolkit.h>
 #import <CDTDatastore/CloudantSync.h>
 #import <IMFData/IMFData.h>
-#import "DDTTYLogger.h"
-#import "WLAuthorizationManager.h"
+#import "CloudantSyncEncryption.h"
+#import <IBMMobileFirstPlatformFoundation/WLAuthorizationManager.h>
 
 #define IBM_DB_NAME @"todosdb"
 

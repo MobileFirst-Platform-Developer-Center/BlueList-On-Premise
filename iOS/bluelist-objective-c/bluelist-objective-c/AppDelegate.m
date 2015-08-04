@@ -14,7 +14,7 @@
 
 #import "AppDelegate.h"
 #import "TodoItem.h"
-#import "WLAuthorizationManager.h"
+#import <IBMMobileFirstPlatformFoundation/WLAuthorizationManager.h>
 
 @interface AppDelegate ()
 

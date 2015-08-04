@@ -12,9 +12,7 @@
 # `pod install` 
 # Cocoa Pods then adds the Frameworks and associated dependencies to your project.
 
-
+source 'https://github.rtp.raleigh.ibm.com/imflocalsdks/imf-client-sdk-specs.git'
 source 'https://github.com/CocoaPods/Specs.git'
-
 platform :ios, '7.0'
-pod 'IMFDataLocal', '~> 1.0.1'
-pod 'CloudantToolkitLocal', '~> 1.0.1'
+pod 'IMFDataLocal/SQLCipher', '1.1.0'

@@ -13,7 +13,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ChallengeHandler.h"
+#import <IBMMobileFirstPlatformFoundation/IBMMobileFirstPlatformFoundation.h>
 
 @interface BlueListChallengeHandler : ChallengeHandler
 @end
