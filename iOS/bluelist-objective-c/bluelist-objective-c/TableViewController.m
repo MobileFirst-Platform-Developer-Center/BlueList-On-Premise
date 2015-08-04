@@ -18,6 +18,7 @@
 #import <CloudantToolkit/CloudantToolkit.h>
 #import <CDTDatastore/CloudantSync.h>
 #import <IMFData/IMFData.h>
+#import "DDTTYLogger.h"
 #import "CloudantSyncEncryption.h"
 #import <IBMMobileFirstPlatformFoundation/WLAuthorizationManager.h>
 
@@ -57,7 +58,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    
     self.highImage = [UIImage imageNamed:@"PriorityHigh.png"];
     self.mediumImage = [UIImage imageNamed:@"PriorityMedium.png"];
     self.lowImage = [UIImage imageNamed:@"PriorityLow.png"];
@@ -86,9 +87,11 @@
     BOOL hasValidConfiguration = YES;
     NSString *cloudantProxyUrl = nil;
     NSString *errorMessage = @"";
+    BOOL encryptionEnabled = NO;
+    NSString *encryptionPassword = nil;
     
     
-     // Read the applicationId from the bluelist.plist.
+    // Read the applicationId from the bluelist.plist.
     NSString *configurationPath = [[NSBundle mainBundle] pathForResource:@"bluelist" ofType:@"plist"];
     if(configurationPath){
         NSDictionary *configuration = [[NSDictionary alloc] initWithContentsOfFile:configurationPath];
@@ -97,31 +100,55 @@
             hasValidConfiguration = NO;
             errorMessage = @"Open the bluelist.plist and set the cloudantProxyUrl";
         }
+        encryptionPassword = [configuration objectForKey:@"encryptionPassword"];
+        if(!encryptionPassword || [encryptionPassword isEqualToString:@""]){
+            encryptionEnabled = NO;
+        }
+        else{
+            encryptionEnabled = YES;
+            dbname = [dbname stringByAppendingString:@"secure"];
+        }
     }
     
     if(hasValidConfiguration){
-    
-    IMFDataManager *manager = [IMFDataManager initializeWithUrl: cloudantProxyUrl];
-    //create a local data store
-    self.datastore = [manager localStore:dbname error: &error];
-    if (error) {
-        [NSException raise:@"DBCreationFailure" format: @"Could not create DB with name %@", dbname];
-    }
-    else{
-        NSLog(@"Local data store created successfully");
-    }
-    
-       
-    //create a remote data store
+        
+        id<CDTEncryptionKeyProvider> keyProvider = nil;
+        IMFDataManager *manager = [IMFDataManager initializeWithUrl: cloudantProxyUrl];
+        //create a local data store. Encrypt the local store if the setting is enabled
+        if (encryptionEnabled){
+            //Initialize the key provider
+            keyProvider = [CDTEncryptionKeychainProvider providerWithPassword:encryptionPassword forIdentifier:@"bluelist"];
+            NSLog(@"Attempting to create an ecrypted local data store");
+            //Initialize an encrypted local store
+            self.datastore = [manager localStore:dbname withEncryptionKeyProvider:keyProvider error:&error];
+        }
+        else{
+            NSLog(@"Attempting to create a local data store");
+            self.datastore = [manager localStore:dbname error: &error];
+        }
+        
+        if (error) {
+            NSLog(@"DBCreationFailure: Could not create DB with name %@.", dbname);
+            if(encryptionEnabled){
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Could not create an encrypted local store with credentials provided. Check the encryptionPassword in the bluelist.plist file." delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
+                [alert show];
+            }
+        }
+        else{
+            NSLog(@"Local data store created successfully");
+        }
+        
+        //create a remote data store
         [manager remoteStore:dbname completionHandler:^(CDTStore *store, NSError *error) {
             if (error) {
-                [NSException raise:@"DBCreationFailure" format: @"Could not create remote DB with name %@", dbname];
+                [NSException raise:@"Fatal Exception from Proxy" format:@"Could not create remote database %@.  Error: %@", dbname, error];
+                NSLog(@"Error: %@ %@", error, [error userInfo]);
             }
             else{
                 self.remotedatastore = store;
                 NSLog(@"Successfully created remote store");
-               
-
+                
+                
                 //create permissions
                 [[IMFDataManager sharedInstance] setCurrentUserPermissions:access forStoreName:dbname completionHander:^(BOOL success, NSError *error) {
                     if (error) {
@@ -131,21 +158,31 @@
                         if ([IMFDataManager sharedInstance].replicatorFactory == nil) {
                             NSLog(@"Replicator Factory is nil on the IMFDataManager.");
                         } else
-                    self.replicatorFactory = [IMFDataManager sharedInstance].replicatorFactory;
-                    self.pullReplication   = [[IMFDataManager sharedInstance] pullReplicationForStore:dbname];
-                    self.pushReplication   = [[IMFDataManager sharedInstance] pushReplicationForStore:dbname];
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self pullItems];
-                        
-                    });
+                            self.replicatorFactory = [IMFDataManager sharedInstance].replicatorFactory;
+                        if(encryptionEnabled){
+                            self.pullReplication   = [[IMFDataManager sharedInstance] pullReplicationForStore:dbname withEncryptionKeyProvider:keyProvider];
+                            self.pushReplication   = [[IMFDataManager sharedInstance] pushReplicationForStore:dbname withEncryptionKeyProvider:keyProvider];
+                            
+                        }
+                        else{
+                            self.pullReplication   = [[IMFDataManager sharedInstance] pullReplicationForStore:dbname];
+                            self.pushReplication   = [[IMFDataManager sharedInstance] pushReplicationForStore:dbname];
+                        }
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self pullItems];
+                            
+                        });
                     }
                 }];
-
+                
             }
-               }];
+        }];
         
-      
+        
         [self.datastore.mapper setDataType:@"TodoItem" forClassName:NSStringFromClass([TodoItem class])];
+    }
+    else{
+        [NSException raise:@"InvalidApplicationConfiguration" format: @"%@", errorMessage];
     }
     
 }
@@ -156,7 +193,7 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         CDTQuery* query = [[CDTCloudantQuery alloc] initDataType:@"TodoItem"];
         [self.datastore performQuery: query completionHandler:^(NSArray *results,
-                                                            NSError *error) {
+                                                                NSError *error) {
             if(error) {
                 NSLog(@"listItems failed with error: %@", error);
             } else {
@@ -279,7 +316,7 @@
         //doing push, push is done read items from local data store and end the refresh UI
         [self listItems:^{
             self.refreshControl.attributedTitle = [[NSAttributedString alloc]initWithString:@"  "];
-
+            
             [self.refreshControl performSelectorOnMainThread:@selector(endRefreshing) withObject:nil waitUntilDone:YES];
             
         }];
@@ -310,7 +347,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     if (section == 0) {
-       return self.filteredListItems.count;
+        return self.filteredListItems.count;
         
     } else {
         return 1;
@@ -473,7 +510,7 @@
     item.name = name;
     item.priority = [NSNumber numberWithInteger:priority];
     [self createItem:item];
-     textField.text = @"";
+    textField.text = @"";
 }
 
 -(void) reloadLocalTableData
