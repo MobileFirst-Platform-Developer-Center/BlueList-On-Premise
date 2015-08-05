@@ -41,6 +41,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     var datastore: CDTStore!
     var remoteStore: CDTStore!
     var cloudantProxyURL:String = ""
+    var encryptionPassword:String = ""
     var replicatorFactory: CDTReplicatorFactory!
     
     var pullReplication: CDTPullReplication!
@@ -72,9 +73,10 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     //MARK: - Data Management
     
-    func setupIMFDatabase(dbName: NSString) {
-      
+    func setupIMFDatabase(dbName: String) {
+        var dbName = dbName
         var hasValidConfiguration:Bool = true
+        var encryptionEnabled:Bool = false
         let configurationPath = NSBundle.mainBundle().pathForResource("bluelist", ofType: "plist")
         if((configurationPath) != nil){
             let configuration = NSDictionary(contentsOfFile: configurationPath!)
@@ -83,17 +85,43 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
                  hasValidConfiguration = false
                  NSLog("%@", "Open the bluelist.plist and set the cloudantProxyUrl");
             }
+            encryptionPassword = configuration?["encryptionPassword"] as! String
+            if(encryptionPassword.isEmpty){
+                encryptionEnabled = false
+            }
+            else {
+                encryptionEnabled = true
+                dbName = dbName + "secure"
+            }
         }
         //Create local data store
         if(hasValidConfiguration){
         var error:NSError?
+        //CDTEncryptionKeyProvider used for encrypting local datastore
+        var keyProvider:CDTEncryptionKeyProvider!
         let manager:IMFDataManager = IMFDataManager.initializeWithUrl(cloudantProxyURL)
-        self.datastore = manager.localStore(dbName as String, error: &error)
-        if ((error) != nil) {
-            NSLog("%@", "Could not create local data store");
-        }
-        else{
-            NSLog("%@", "Local data store create successfully")
+            //create a local data store. Encrypt the local store if the setting is enabled
+            if (encryptionEnabled){
+                //Initialize the key provider
+                keyProvider = CDTEncryptionKeychainProvider(password: encryptionPassword, forIdentifier:"bluelist")
+                NSLog("%@", "Attempting to create an encrypted local data store")
+                //Initialize the encrypted store
+                self.datastore = manager.localStore(dbName, withEncryptionKeyProvider: keyProvider, error: &error)
+            }
+            else{
+                NSLog("%@","Attempting to create a local data store")
+                self.datastore = manager.localStore(dbName, error: &error)
+            }
+            if ((error) != nil) {
+                NSLog("%@", "Could not create local data store with name " + dbName)
+                if(encryptionEnabled){
+                    let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not create an encrypted local store with credentials provided. Check the encryptionPassword in the bluelist.plist file.", delegate:self , cancelButtonTitle: "Okay")
+                    alert.show()
+                    return
+                }
+            }
+            else{
+                NSLog("%@", "Local data store create successfully: " + dbName)
             }
             
             if (!IBM_SYNC_ENABLE) {
@@ -115,8 +143,16 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
                             if (error != nil) {
                             }
                             self.replicatorFactory = manager.replicatorFactory
-                            self.pullReplication = manager.pullReplicationForStore(dbName as String)
-                            self.pushReplication = manager.pushReplicationForStore(dbName as String)
+                            if(encryptionEnabled){
+                                self.pullReplication = manager.pullReplicationForStore(dbName, withEncryptionKeyProvider:keyProvider)
+                                self.pushReplication = manager.pushReplicationForStore(dbName, withEncryptionKeyProvider:keyProvider)
+                            }
+                            else{
+                                self.pullReplication = manager.pullReplicationForStore(dbName)
+                                self.pushReplication = manager.pushReplicationForStore(dbName)
+                                
+                            }
+
                             self.pullItems()
                         })
                 }

@@ -16,8 +16,15 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "WLSwiftBridgingHeader.h"
+#import <IBMMobileFirstPlatformFoundation/IBMMobileFirstPlatformFoundation.h>
 #import <CloudantToolkit/CloudantToolkit.h>
 #import <CloudantSync.h>
+#import "CloudantSyncEncryption.h"
 #import <IMFData/IMFData.h>
+#import "CDTEncryptionKeyNilProvider.h"
+#import "CDTEncryptionKeychainProvider.h"
+#import "CDTEncryptionKeySimpleProvider.h"
+#import "CDTDatastoreManager+EncryptionKey.h"
+#import <IMFData/IMFDataManager+EncryptionKey.h>
+
 
