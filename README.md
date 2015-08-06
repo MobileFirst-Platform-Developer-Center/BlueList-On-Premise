@@ -9,7 +9,7 @@ This sample will leverage the technology available in the IBM MobileFirst Founda
 You can clone the samples from IBM DevOps Services with the following command:
 
 `
-git clone https://hub.jazz.net/git/mobilecloud/mfp-bluelist-on-premises
+git clone https://github.com/MobileFirst-Platform-Developer-Center/BlueList-On-Premise
 `
 ##Before you run the sample:
 
@@ -23,7 +23,7 @@ git clone https://hub.jazz.net/git/mobilecloud/mfp-bluelist-on-premises
 
 Navigate to the BlueList directory.
 `
-$> cd mfp-bluelist-on-premises/BlueList/
+$> cd BlueList-On-Premise/BlueList/
 `
 
 Complete the following calls in the BlueList directory:
@@ -33,15 +33,15 @@ Complete the following calls in the BlueList directory:
 
 At this point, a browser will open and you should see the Worklight console.  The default login credentials are user 'admin' with password 'admin'.  There should be 2 applications deployed and 1 adapter.
 
-## Running the Android sample (mfp-bluelist-on-premises/android)
+## Running the Android sample (BlueList-On-Premise/android)
 
 See the instructions in the android/README.md file.
 
-## Running the iOS sample (mfp-bluelist-on-premises/iOS)
+## Running the iOS sample (BlueList-On-Premise/iOS)
 
 See the instructions in the iOS/README.md file.
 
-## For More Info on How to Run the Samples and How They Work See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-0/advanced-topics/cloudant-nosql-db-api/)
+## For More Info on How to Run the Samples and How They Work See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-1/foundation/data/working-with-cloudant-nosql-db-api/)
 
 ## License
 This package contains sample code provided in source code form. The samples are licensed under the under the Apache License, Version 2.0 (the "License").  You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 and may also view the license in the license.txt file within this package.  Also see the notices.txt file within this package for additional notices.

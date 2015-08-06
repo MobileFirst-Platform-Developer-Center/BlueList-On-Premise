@@ -9,7 +9,7 @@ This sample will leverage the technology available in the IBM MobileFirst Founda
 You can clone the sample from IBM DevOps Services with the following command:
 
 `
-git clone https://hub.jazz.net/git/mobilecloud/mfp-bluelist-on-premises
+git clone https://github.com/MobileFirst-Platform-Developer-Center/BlueList-On-Premise
 `
 ##Before you run the sample:
 
@@ -23,7 +23,7 @@ git clone https://hub.jazz.net/git/mobilecloud/mfp-bluelist-on-premises
 
 Navigate to the BlueList directory.
 `
-$> cd mfp-bluelist-on-premises/BlueList/
+$> cd BlueList-On-Premise/BlueList/
 `
 
 Complete the following calls in the BlueList directory:
@@ -33,7 +33,7 @@ Complete the following calls in the BlueList directory:
 
 At this point, a browser will open and you should see the Worklight console.  The default login credentials are user 'admin' with password 'admin'.  There should be 2 applications deployed and 1 adapter.
 
-## Running the Android sample (mfp-bluelist-on-premises/android)
+## Running the Android sample (Bluelist-On-Premise/android)
 
 1. Ensure you have Gradle installed. You can get the latest Gradle distribution from www.Gradle.org, simply download into your desired directory.
 
@@ -43,4 +43,4 @@ At this point, a browser will open and you should see the Worklight console.  Th
 
 4. Click "run" and watch as your app communicates with your Cloudant Local backend
 
-## For More Info on How to Run this Sample and How It Works See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-0/advanced-topics/cloudant-nosql-db-api/android-cloudant-nosql-db-api/)
+## For More Info on How to Run this Sample and How It Works See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-1/foundation/data/working-with-cloudant-nosql-db-api/android/)

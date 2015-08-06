@@ -9,7 +9,7 @@ This sample will leverage the technology available in the IBM MobileFirst Founda
 You can clone the samples from IBM DevOps Services with the following command:
 
 `
-git clone https://hub.jazz.net/git/mobilecloud/mfp-bluelist-on-premises
+git clone https://github.com/MobileFirst-Platform-Developer-Center/BlueList-On-Premise
 `
 ##Before you run the sample:
 
@@ -23,7 +23,7 @@ git clone https://hub.jazz.net/git/mobilecloud/mfp-bluelist-on-premises
 
 Navigate to the BlueList directory.
 `
-$> cd mfp-bluelist-on-premises/BlueList/
+$> cd BlueList-On-Premise/BlueList/
 `
 
 Complete the following calls in the BlueList directory:
@@ -45,7 +45,7 @@ Setup CocoaPods using the following terminal command:
 
 `$ pod setup`
 
-The next step is to download and install the required dependencies for this project using the Podfile that has been provided. Navigate to the Xcode project directory in terminal (/mfp-bluelist-on-premises/iOS/bluelist-objective-c/ or /mfp-bluelist-on-premises/iOS/bluelist-swift/ in the sample provided) and run the following command:
+The next step is to download and install the required dependencies for this project using the Podfile that has been provided. Navigate to the Xcode project directory in terminal (/BlueList-On-Premise/iOS/bluelist-objective-c/ or /BlueList-On-Premise/iOS/bluelist-swift/ in the sample provided) and run the following command:
 
 `$ pod install`
 
@@ -60,4 +60,4 @@ Once the project is open please check and update the following items:
 
 Now we can run the sample on the simulators provided by Xcode or a supported iOS device.
 
-## For More Info on How to Run this Sample and How It Works See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-0/advanced-topics/cloudant-nosql-db-api/ios-cloudant-nosql-db-api/)
+## For More Info on How to Run this Sample and How It Works See the [Getting Started Module](https://developer.ibm.com/mobilefirstplatform/documentation/getting-started-7-1/foundation/data/working-with-cloudant-nosql-db-api/ios/)
