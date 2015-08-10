@@ -16,6 +16,7 @@
 package com.ibm.mfp_bluelist_on_premises;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -98,7 +99,7 @@ public class MainActivity extends Activity {
         // List of strings to identify string keys in hashmap
         String[] from = {"priority","txt"};
         // List of xml views to set key values
-        int[] to = {R.id.priority,R.id.txt};
+        int[] to = {R.id.priority, R.id.txt};
         // Creating simple adapter to associate list of hashmaps with appropriate list view and items and allows for image and text to be created and interacted with in the listView
         simpleAdapter = new SimpleAdapter(getBaseContext(), adapterList, R.layout.listview_layout, from, to);
         // Set adapter to list View after configuration
@@ -175,6 +176,10 @@ public class MainActivity extends Activity {
      * @param view The tapped toggle button.
      */
     public void onToggle(View view) {
+        // Show error alert if Object Mapper failed, indicating encryption password is wrong, otherwise create add Dialog box
+        if(dataStoreManager.getError()){
+            createErrorAlert();
+        }
         // Get parent of toggle button (Radio Group) to check the Id, without this the filter tabs do not maintain visually
         ((RadioGroup)view.getParent()).check(view.getId());
         // Grab text from the button to filter appropriately
@@ -219,6 +224,18 @@ public class MainActivity extends Activity {
         simpleAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * Creates Error Alert to let the user know that something went wrong.
+     * Mainly, to show that when the key provider password is changed in bluelist.properties file, the app can not access the encrypted local store anymore.
+     */
+    private void createErrorAlert(){
+        new AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setCancelable(true)
+                .setMessage("Could not create an encrypted local store with credentials provided. Check the encryptionPassword in the bluelist.plist file.")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
 
     /**
      * Radio Button Listener to ensure only one and always one sort button is toggled
@@ -251,7 +268,7 @@ public class MainActivity extends Activity {
      */
     private AdapterView.OnItemLongClickListener deleteListener = new AdapterView.OnItemLongClickListener(){
         @Override
-        public boolean onItemLongClick(android.widget.AdapterView <?> parent, View view, int position, long id) {
+        public boolean onItemLongClick(AdapterView <?> parent, View view, int position, long id) {
             // Grab TodoItem to delete from current showing list
             TodoItem todoItemToDelete = filterLists.get(filter).get(position);
             // Remove from all List
@@ -297,65 +314,70 @@ public class MainActivity extends Activity {
      * When the 'Done' button is tapped, a new TodoItem is created in the UI and in the local data store.
      * @param view The list item that is tapped.
      */
-    public void addTodo(View view){
-        // Create dialog pop-up
-        final Dialog addDialog = new Dialog(this);
+    public void addTodo(View view) {
+        // Show error alert if Object Mapper failed, indicating encryption password is wrong, otherwise create add Dialog box
+        if (dataStoreManager.getError()) {
+            createErrorAlert();
+        } else {
+            // Create dialog pop-up
+            final Dialog addDialog = new Dialog(this);
 
-        // Set dialog configuration and show
-        addDialog.setContentView(R.layout.add_edit_dialog);
-        addDialog.setTitle("Add Todo");
-        TextView textView = (TextView) addDialog.findViewById(android.R.id.title);
-        if(textView != null) {
-            textView.setGravity(Gravity.CENTER);
-        }
-        addDialog.setCancelable(true);
-        Button add =(Button) addDialog.findViewById(R.id.Add);
-        addDialog.show();
-
-        // Set on click listener for done button to grab text entered by user and create a new list object
-        add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditText itemToAdd =(EditText) addDialog.findViewById(R.id.todo);
-                String toAdd = itemToAdd.getText().toString();
-                // If text was added, continue with normal operations
-                if(!toAdd.isEmpty()) {
-                    // Create the new TodoItem
-                    TodoItem todoToAdd = new TodoItem(toAdd, filter);
-                    // Save new TodoItem to local store
-                    Store store = dataStoreManager.getTodosStore();
-                    store.save(todoToAdd).continueWith(new Continuation<Object, Void>() {
-
-                        @Override
-                        public Void then(Task<Object> task) throws Exception {
-                            // Log if the save was cancelled.
-                            if (task.isCancelled()) {
-                                Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
-                                // sync UI back with local store
-                                restoreLocalData();
-                            }
-                            // Log error message, if the save task fails.
-                            else if (task.isFaulted()) {
-                                Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
-                                // sync UI back with local store
-                                restoreLocalData();
-                            }
-
-                            // If the result succeeds, add the new TodoItem and load the list.
-                            else {
-                                allList.add((TodoItem) task.getResult());
-                                popLists();
-                                Log.i("STORE_CHANGE:","Item added to local store " + task.getResult());
-                            }
-                            return null;
-                        }
-
-                    });
-                }
-                // Kill dialog when finished, or if no text was added
-                addDialog.dismiss();
+            // Set dialog configuration and show
+            addDialog.setContentView(R.layout.add_edit_dialog);
+            addDialog.setTitle("Add Todo");
+            TextView textView = (TextView) addDialog.findViewById(android.R.id.title);
+            if (textView != null) {
+                textView.setGravity(Gravity.CENTER);
             }
-        });
+            addDialog.setCancelable(true);
+            Button add = (Button) addDialog.findViewById(R.id.Add);
+            addDialog.show();
+
+            // Set on click listener for done button to grab text entered by user and create a new list object
+            add.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    EditText itemToAdd = (EditText) addDialog.findViewById(R.id.todo);
+                    String toAdd = itemToAdd.getText().toString();
+                    // If text was added, continue with normal operations
+                    if (!toAdd.isEmpty()) {
+                        // Create the new TodoItem
+                        TodoItem todoToAdd = new TodoItem(toAdd, filter);
+                        // Save new TodoItem to local store
+                        Store store = dataStoreManager.getTodosStore();
+                        store.save(todoToAdd).continueWith(new Continuation<Object, Void>() {
+
+                            @Override
+                            public Void then(Task<Object> task) throws Exception {
+                                // Log if the save was cancelled.
+                                if (task.isCancelled()) {
+                                    Log.e(CLASS_NAME, "Exception : Task " + task.toString() + " was cancelled.");
+                                    // sync UI back with local store
+                                    restoreLocalData();
+                                }
+                                // Log error message, if the save task fails.
+                                else if (task.isFaulted()) {
+                                    Log.e(CLASS_NAME, "Exception : " + task.getError().getMessage());
+                                    // sync UI back with local store
+                                    restoreLocalData();
+                                }
+
+                                // If the result succeeds, add the new TodoItem and load the list.
+                                else {
+                                    allList.add((TodoItem) task.getResult());
+                                    popLists();
+                                    Log.i("STORE_CHANGE:", "Item added to local store " + task.getResult());
+                                }
+                                return null;
+                            }
+
+                        });
+                    }
+                    // Kill dialog when finished, or if no text was added
+                    addDialog.dismiss();
+                }
+            });
+        }
     }
 
     /**

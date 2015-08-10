@@ -21,6 +21,8 @@ import android.content.res.AssetManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.cloudant.sync.datastore.encryption.AndroidKeyProvider;
+import com.cloudant.sync.datastore.encryption.KeyProvider;
 import com.cloudant.sync.notifications.ReplicationCompleted;
 import com.cloudant.sync.notifications.ReplicationErrored;
 import com.cloudant.sync.replication.ErrorInfo;
@@ -35,6 +37,8 @@ import com.cloudant.toolkit.query.CloudantQuery;
 import com.google.common.eventbus.Subscribe;
 import com.ibm.imf.data.DataManager;
 import com.worklight.wlclient.api.WLClient;
+
+import net.sqlcipher.database.SQLiteDatabase;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -76,6 +80,7 @@ public class DataStoreManager {
      */
     private static String CLOUDANT_PROXY_URL;  // e.g. "http://imfdata02.rtp.raleigh.ibm.com:10080/imfdata";
     private static String DBName;              // name of the database with the items documents
+    private String keyProviderPassword; // (optional) the password for your encryption key provider
 
     /**
      * Bluelist properties
@@ -87,27 +92,31 @@ public class DataStoreManager {
     private static final String PROP_NAME_SEC_USERPW = "secUserPw";
     private static final String PROP_NAME_SEC_ADAPTERNAME = "secAdapterName";
     private static final String PROP_NAME_SEC_SCOPE = "secScope";
+    private static final String PROP_NAME_KEY_PROVIDER_PASSWORD = "keyProviderPw";
 
     private static final String CLASS_NAME = DataStoreManager.class.getSimpleName();
     private static final String IndexName = "todosIndex";
+    private static final String IDENTIFIER = "bluelist";
 
-    ArrayList<TodoItem> todoItemList;
-    Store todosStore;
-    Store remoteStore;
-    Store localStore;
-    DataManager manager;
-    WLClient client;
-    BlueListChallengeHandler blueListChallengeHandler;
-    Context context;
-    Activity activity;
+    private ArrayList<TodoItem> todoItemList;
+    private KeyProvider keyProvider;
+    private Store todosStore;
+    private Store remoteStore;
+    private Store localStore;
+    private DataManager manager;
+    private WLClient client;
+    private BlueListChallengeHandler blueListChallengeHandler;
+    private Context context;
+    private Activity activity;
+    private boolean localFailure = false;
 
-    protected DataStoreManager(Context context, Activity activity){
+    protected DataStoreManager(Context context, Activity activity) {
 
         todoItemList = new ArrayList<>();
         this.activity = activity;
         this.context = context;
 
-        Properties props = new java.util.Properties();
+        Properties props = new Properties();
         try {
             AssetManager assetManager = context.getAssets();
             props.load(assetManager.open(PROPS_FILE));
@@ -142,6 +151,10 @@ public class DataStoreManager {
                 secScope = DEFAULT_NAME_SEC_SCOPE;
             }
 
+            // Get key provider password from bluelist.properties file
+            keyProviderPassword = props.getProperty(PROP_NAME_KEY_PROVIDER_PASSWORD);
+
+            // Create Challenge Handler and set properties
             blueListChallengeHandler = new BlueListChallengeHandler(secScope);
             blueListChallengeHandler.UserName = secUsername;
             blueListChallengeHandler.UserPassword = secUserPassword;
@@ -153,6 +166,7 @@ public class DataStoreManager {
             Log.i(CLASS_NAME, "CH user password: " + secUserPassword);
             Log.i(CLASS_NAME, "CH adapter name: " + secAdapaterName);
             Log.i(CLASS_NAME, "CH scope: " + secScope);
+            Log.i(CLASS_NAME, "Key Provider Password: " + keyProviderPassword);
         } catch (FileNotFoundException e) {
             Log.e(CLASS_NAME, "The bluelist.properties file was not found.", e);
         } catch (IOException e) {
@@ -160,7 +174,7 @@ public class DataStoreManager {
                     "The bluelist.properties file could not be read properly.", e);
         }
 
-        // Initialize DataManager and WLClient
+        // Initialize DataManager and WLClient and register challenge handler
         try {
             manager = DataManager.initialize(context, new URL(CLOUDANT_PROXY_URL));
             client = WLClient.createInstance(context);
@@ -170,23 +184,50 @@ public class DataStoreManager {
                     "The Cloudant proxy URL was invalid.", e);
         }
 
+        // Creates an Android Key Provider if a keyProvider Password is provided
+        setKeyProvider();
+
         // Create the local store
         try {
-            final Task<Store> localtask = manager.localStore(DBName);
-            localtask.waitForCompletion();
+            final Task<Store> localtask;
+            String secure;
 
-            if (localtask.isFaulted()) {
-                System.out.println("Failed to create localStore DB name: " + DBName + "\nError: " + localtask.getError().getLocalizedMessage());
-                throw localtask.getError();
-            } else {
-                localStore = localtask.getResult();
+            // If password was not provided the keyProvider will be null
+            if (keyProvider == null) {
+                secure = "";
+                localtask = manager.localStore(DBName);
             }
-        } catch (Exception e) {
+            // If a password was provided then an encrypted local store is created with the keyProvider created earlier
+            else {
+                secure = "secure";
+                // Need the SQLiteDatabase Libs to encrypt local store
+                SQLiteDatabase.loadLibs(context);
+                localtask = manager.localStore(DBName + secure, keyProvider);
+            }
+
+            // Need to make the string final to append to print statement within the continueWith block
+            final String Secure = secure;
+
+            localtask.continueWith(new Continuation<Store, Void>() {
+                @Override
+                public Void then(Task<Store> task) throws Exception {
+                    if (task.isFaulted()) {
+                        System.out.println("Failed to create localStore DB name: " + DBName + Secure + "\nError: " + localtask.getError().getLocalizedMessage());
+                        throw localtask.getError();
+                    } else {
+                        localStore = localtask.getResult();
+                    }
+                    return null;
+                }
+            });
+
+
+        } catch (NullPointerException e) {
             Log.e(CLASS_NAME,
                     "DataManager failed to create a local datastore.", e);
         }
 
-        // Create the remote store
+        // Create the remote store using the waitForCompletion call. An alternative to the continueWith function used to create a local store above.
         try {
             final Task<Store> task = manager.remoteStore(DBName);
             task.waitForCompletion();
@@ -206,34 +247,65 @@ public class DataStoreManager {
             }
         } catch (Exception e) {
             Log.e(CLASS_NAME,
-                    "DataManager failed to create a remote datastore.", e);
+                    "DataManager failed to create a remote datastore. Check your internet connection.", e);
         }
 
         todosStore = getStore();
 
         // Set the data object mapper
-        todosStore.setMapper(new DataObjectMapper());
         try {
+
+            todosStore.setMapper(new DataObjectMapper());
+
             todosStore.getMapper().setDataTypeForClassName("TodoItem", TodoItem.class.getCanonicalName());
         } catch (Exception e) {
+            // If the data type cannot be set here, chances are the password is incorrect for the encrypted local store.
             Log.e(CLASS_NAME, "Error setting data type for class", e);
+            // Set this localFailure boolean value so that the main activity can react appropriately to the failure.
+            localFailure = true;
         }
 
         // To perform queries, you must create an index
         List<IndexField> indexFields = new ArrayList<>();
         indexFields.add(new IndexField("@datatype"));
-        Task t = todosStore.createIndex(IndexName, indexFields);
-        try {
-            t.waitForCompletion();
-        } catch (InterruptedException e2) {
-            Log.e(CLASS_NAME, "Interrupted waiting for creation of index", e2);
-        }
-        if (t.isFaulted()) {
-            Log.e(CLASS_NAME, "Error creating index", t.getError());
+        if (todosStore != null) {
+            Task t = todosStore.createIndex(IndexName, indexFields);
+            try {
+                t.waitForCompletion();
+            } catch (InterruptedException e2) {
+                Log.e(CLASS_NAME, "Interrupted waiting for creation of index", e2);
+            }
+            if (t.isFaulted()) {
+                Log.e(CLASS_NAME, "Error creating index", t.getError());
+            }
         }
 
         doPullReplication(true);
         setItemList();
+    }
+
+    /**
+     * Creates an Android Key Provider if a keyProviderPassword is supplied from the bluelist.properties file.
+     * If no password provided, the keyProvider is set to null.
+     */
+    private void setKeyProvider() {
+        if (isEmpty(keyProviderPassword)) {
+            keyProvider = null;
+        } else {
+            keyProvider = new AndroidKeyProvider(context, keyProviderPassword, IDENTIFIER);
+        }
+    }
+
+    /**
+     * isEmpty Helper function
+     * @param string The tested String value
+     * @return Boolean based on String value
+     */
+    private boolean isEmpty(String string) {
+        if (string == null || string.isEmpty())
+            return true;
+
+        return false;
     }
 
     /**
@@ -272,6 +344,14 @@ public class DataStoreManager {
      */
     public Store getStore() {
         return localStore;
+    }
+
+    /**
+     * Function used to tell the main activity if the password for the encrypted local store is wrong.
+     * @return Boolean true if the Object Mapper failed to be set.
+     */
+    public boolean getError(){
+        return localFailure;
     }
 
     /**
@@ -363,7 +443,13 @@ public class DataStoreManager {
             });
 
             // create one-way replication task
-            Task<PullReplication> pullTask = manager.pullReplicationForStore(DBName);
+            Task<PullReplication> pullTask;
+            // If local store is encrypted we need to provide the keyProvider when kicking off pull replication
+            if(keyProvider != null){
+                pullTask = manager.pullReplicationForStore(DBName + "secure", keyProvider);
+            }else {
+                pullTask = manager.pullReplicationForStore(DBName);
+            }
             pullTask.waitForCompletion();
             if (pullTask.isFaulted()){
 
@@ -426,7 +512,13 @@ public class DataStoreManager {
             });
 
             // create one-way replication task
-            Task<PushReplication> pushTask = manager.pushReplicationForStore(DBName);
+            Task<PushReplication> pushTask;
+            // If local store is encrypted we need to provide the keyProvider when kicking off push replication
+            if(keyProvider != null) {
+                pushTask = manager.pushReplicationForStore(DBName + "secure", keyProvider);
+            }else{
+                pushTask = manager.pushReplicationForStore(DBName);
+            }
             pushTask.waitForCompletion();
             if (pushTask.isFaulted()){
                 Log.e(CLASS_NAME, "Push replication error", pushTask.getError());

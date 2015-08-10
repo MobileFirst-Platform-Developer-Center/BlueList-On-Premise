@@ -18,6 +18,10 @@ android {
     }
     productFlavors {
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
 }
 
 repositories {
@@ -33,8 +37,7 @@ repositories {
 }
 
 dependencies {
-    compile(name: 'worklight-android', ext: 'jar')
-    compile 'com.ibm.mobile.services:imfdata-local:1.0.0'
-    compile 'com.ibm.mobile.services:cloudant-toolkit-local:1.0.0'
+    compile 'com.ibm.mobile.services:imfdata-local:1.+'
+    compile 'com.ibm.mobile.services:cloudant-toolkit-local:1.+'
     compile 'com.android.support:appcompat-v7:21.0.3'
 }
