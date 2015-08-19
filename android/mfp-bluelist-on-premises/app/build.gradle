@@ -20,25 +20,31 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
-}
-
-repositories {
-    jcenter()
-    mavenLocal()
-    maven {
-        url "http://cloudant.github.io/cloudant-sync-eap/repository/"
-    }
-    mavenCentral()
     flatDir {
         dirs 'libs'
     }
 }
 
+repositories {
+    mavenCentral()
+    // Required for cloudant-toolkit-local
+    maven {
+        url "http://cloudant.github.io/cloudant-sync-eap/repository/"
+    }
+}
+
 dependencies {
-    compile group: 'com.worklight', name: 'worklight-android-native', version: 'Main-SNAPSHOT', ext: 'jar'
-    compile group: 'com.ibm.mobile', name: 'imfdata-local', version: 'Main-SNAPSHOT', ext: 'aar'
-    compile group: 'com.ibm.mobile', name: 'cloudant-toolkit-local', version: 'Main-SNAPSHOT', ext: 'aar'
-    compile group: 'com.ibm.mobile', name: 'cloudant-toolkit-local', version: 'Main-SNAPSHOT'
+    compile 'com.ibm.mobile.services:cloudant-toolkit-local:1.1.0'
+    compile 'com.ibm.mobile.services:imfdata-local:1.1.0'
+
+// You will need to use the 7.1 CLI to get the worklight-native.jar for the time being, apologies for the inconvenience
+// 1) Create a temporary WL project with the CLI to get the jar
+// 2) Copy/Paste the jar from step 1 into this project's 'libs' directory (bluelist-on-premise\android\bluelist-android-on-premise\libs).
+//    compile ('com.ibm.mobile.foundation:ibmmobilefirstplatformfoundation:7.1.0.0@aar') {
+//        transitive = true
+//    }
+
+    compile fileTree(include: '*.jar', dir: 'libs')
 
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile files('src/main/jniLibs/sqlcipher.jar')
