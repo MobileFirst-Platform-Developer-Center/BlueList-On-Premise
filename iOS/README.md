@@ -51,7 +51,9 @@ The next step is to download and install the required dependencies for this proj
 
 After the dependencies have been installed open the bluelist-objective-c.xcworkspace or bluelist-swift.xcworkspace. When using CocoaPods you must use the .xcworkspace instead of the .xcodeproject file because of how the dependencies are configured.
 
-NOTE: For the Swift sample you must run and compile the application on the latest version of Xcode.
+NOTE: For the Swift sample you must run and compile the application on the latest version of Xcode. For iOS9 some changes may be required to your application/server. Please see the following release document for more information:
+
+[Support for iOS9] (https://developer.ibm.com/mobilefirstplatform/2015/09/09/mobilefirst-platform-support-for-ios-9/)
 
 Once the project is open please check and update the following items:
 
