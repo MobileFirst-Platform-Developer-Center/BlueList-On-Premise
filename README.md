@@ -27,7 +27,7 @@ $> cd BlueList-On-Premise/BlueList/
 `
 
 Complete the following calls in the BlueList directory:
-- `$> mfp create-server`
+- `$> mfp server create`
 - `$> mfp start`
 - `$> mfp console`
 
