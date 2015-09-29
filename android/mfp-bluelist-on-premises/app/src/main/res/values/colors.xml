@@ -15,8 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <resources>
-    <color name="blue">#FF00648D</color>
-    <color name="white">#FFFFFF</color>
+    <color name="blue">#ff00648d</color>
+    <color name="white">#ffffff</color>
     <color name="black">#000000</color>
-    <color name="light_blue">#0276FD</color>
+    <color name="light_blue">#0276fd</color>
+    <color name="transparent">#00000000</color>
 </resources>

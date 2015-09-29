@@ -17,21 +17,21 @@ git clone https://github.com/MobileFirst-Platform-Developer-Center/BlueList-On-P
 
 - You will need the MobileFirst Platform Server instance installed and configured. One way to accomplish this is by [installing the MobileFirst CLI](http://ibm.biz/knowctr#SSHS8R_7.0.0/com.ibm.worklight.installconfig.doc/dev/t_wl_installing_cli.html)
 
-- You will need a proxy to communicate with Cloudant and the Mobile First PLatform --> [Installing the MobileFirst Data Proxy Server](http://ibm.biz/knowctr#SSHS8R_7.0.0/com.ibm.worklight.installconfig.doc/install_config/t_installing_imf_datastore.html)
-
 ## Worklight Server Setup Using MobileFirst CLI
 
-Navigate to the BlueList directory.
+Navigate to the BlueListProxy directory.
 `
-$> cd BlueList-On-Premise/BlueList/
+$> cd BlueList-On-Premise/BlueListProxy/
 `
 
-Complete the following calls in the BlueList directory:
+Edit the server/conf/worklight.properties file.  Change the CloudantProtocol, CloudantHost, CloudantPort, CloudantUsername, and CloudantPassword values to match your IBM MobileFirst Platform Cloudant Data Layer Local Edition access information.
+
+Complete the following calls in the BlueListProxy directory:
 - `$> mfp server create`
 - `$> mfp start`
 - `$> mfp console`
 
-At this point, a browser will open and you should see the Worklight console.  The default login credentials are user 'admin' with password 'admin'.  There should be 2 applications deployed and 1 adapter.
+At this point, a browser will open and you should see the Worklight console.  The default login credentials are user 'admin' with password 'admin'.  There should be 2 applications deployed and 2 adapters.
 
 ## Running the Android sample (BlueList-On-Premise/android)
 

@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
     defaultConfig {
-        applicationId 'com.ibm.mfp_bluelist_on_premises'
-        minSdkVersion 16
-        targetSdkVersion 22
+        applicationId 'com.ibm.bluelist'
+        minSdkVersion 15
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
@@ -16,36 +16,29 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+    }
+
     packagingOptions {
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
+        pickFirst 'META-INF/ASL2.0'
+        pickFirst 'META-INF/LICENSE.txt'
+        pickFirst 'META-INF/NOTICE.txt'
+        pickFirst 'META-INF/LICENSE'
+        pickFirst 'META-INF/NOTICE'
     }
 }
 
 repositories {
+    jcenter()
+    mavenLocal()
     mavenCentral()
-    // Required for cloudant-toolkit-local
-    maven {
-        url "http://cloudant.github.io/cloudant-sync-eap/repository/"
-    }
-    flatDir {
-        dirs 'libs'
-    }
+    maven { url "http://cloudant.github.io/cloudant-sync-eap/repository/" }
 }
 
 dependencies {
-    compile 'com.ibm.mobile.services:cloudant-toolkit-local:1.1.0'
-    compile 'com.ibm.mobile.services:imfdata-local:1.1.0'
-
-// You will need to use the 7.1 CLI to get the worklight-native.jar for the time being, apologies for the inconvenience
-// 1) Create a temporary WL project with the CLI to get the jar
-// 2) Copy/Paste the jar from step 1 into this project's 'libs' directory (bluelist-on-premise\android\bluelist-android-on-premise\libs).
-//    compile ('com.ibm.mobile.foundation:ibmmobilefirstplatformfoundation:7.1.0.0@aar') {
-//        transitive = true
-//    }
-
-    compile fileTree(include: '*.jar', dir: 'libs')
-
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile files('src/main/jniLibs/sqlcipher.jar')
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile group: 'com.ibm.mobile.foundation', name: 'ibmmobilefirstplatformfoundation', version:'7.1.0.0', ext: 'aar', transitive: true
+    compile 'com.cloudant:cloudant-sync-datastore-core:0.13.4'
+    compile 'com.cloudant:cloudant-sync-datastore-android:0.13.4'
+    compile 'com.cloudant:cloudant-sync-datastore-android-encryption:0.13.4'
 }

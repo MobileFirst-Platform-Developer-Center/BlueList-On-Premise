@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ibm.mfp_bluelist_on_premises">
+    package="com.ibm.bluelist">
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -9,12 +9,13 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
+        android:name="BlueListApplication"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.NoTitleBar"
         android:icon="@mipmap/logo"
         android:allowBackup="true">
         <activity
-            android:name="com.ibm.mfp_bluelist_on_premises.SplashActivity"
+            android:name="com.ibm.bluelist.SplashActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,8 +23,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.ibm.mfp_bluelist_on_premises.MainActivity"
-            android:label="@string/app_name">
+            android:name="com.ibm.bluelist.MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/IBMCustomTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

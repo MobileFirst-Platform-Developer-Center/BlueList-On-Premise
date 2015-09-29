@@ -28,24 +28,24 @@ limitations under the License.
         android:contentDescription="priority"
         android:paddingEnd="10dp"
         android:paddingRight="21dp"
-        android:onClick="priorityChange"
+        android:onClick="incrementTodoPriority"
         android:background="@android:color/transparent"
-        android:clickable="true" />
+        android:clickable="true"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="49dp"
         android:orientation="vertical"
-        android:onClick="editTodo">
+        android:onClick="editTodoName">
         <TextView
             android:textColor="@android:color/black"
-            android:id="@+id/txt"
+            android:id="@+id/name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:textSize="16sp"
             android:gravity="center_vertical"
             android:longClickable="true"
-            android:onClick="editTodo"
+            android:onClick="editTodoName"
             android:singleLine="true"
             android:ellipsize="end"/>
     </LinearLayout>

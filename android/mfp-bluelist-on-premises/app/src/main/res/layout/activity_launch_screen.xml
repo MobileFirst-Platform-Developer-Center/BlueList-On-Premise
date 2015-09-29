@@ -37,7 +37,7 @@ limitations under the License.
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/editText"
+        android:id="@+id/CopyrightText"
         android:text="@string/Copyright"
         android:textColor="@color/black"
         android:textStyle="bold"

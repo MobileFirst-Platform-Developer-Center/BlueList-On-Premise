@@ -14,13 +14,41 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <resources>
-    <style name="BlueListTitleStyle">
+
+    <style name="IBMCustomTheme" parent="@android:style/Theme.Holo.Light">
+        <item name="android:logo">@color/transparent</item>
+        <item name="android:actionBarTabBarStyle">@style/IBMCustomActionBarTabBar</item>
+        <item name="android:actionBarTabStyle">@style/IBMCustomActionBarTab</item>
+        <item name="android:actionBarStyle">@style/IBMCustomActionBar</item>
+    </style>
+
+    <style name="IBMCustomActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">@color/blue</item>
+        <item name="android:titleTextStyle">@style/IBMCustomTitle</item>
+        <item name="android:text">@string/Title</item>
+        <item name="android:actionBarTabTextStyle">@style/IBMCustomActionBarTabText</item>
+    </style>
+    
+    <style name="IBMCustomActionBarTabText" parent="@android:style/Widget.Holo.Light.ActionBar.TabText">
         <item name="android:textColor">@color/white</item>
-        <item name="android:padding">12dp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="IBMCustomTitle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    
+    <style name="IBMCustomActionBarTabBar" parent="@android:style/Widget.Holo.Light.ActionBar.TabBar">
+        <item name="android:background">@color/white</item>
+    </style>
+
+    <style name="IBMCustomActionBarTab" parent="@android:style/Widget.Holo.Light.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_bar_background</item>
+        <item name="android:dividerPadding">0dp</item>
         <item name="android:gravity">center</item>
-        <item name="android:text">@string/Title</item>
     </style>
 
     <style name="BlueListListStyle">
@@ -29,13 +57,7 @@ limitations under the License.
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="ToggleButton">
-        <item name="android:onClick">onToggle</item>
-        <item name="android:textColor">@drawable/text_toggle</item>
-        <item name="android:background">@drawable/button_toggle</item>
-    </style>
-
-    <style name="PlusButton">
+    <style name="PlusButton" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:background">@drawable/button_response</item>
     </style>
 
