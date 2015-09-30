@@ -239,8 +239,8 @@ public class PermissionsHandler {
 		String encryptedPass_hex;
 		MessageDigest md;
 		try{
-			byte [] encryptedPass = KeyPassManager.getInstance().encryptWithSalt(password, salt);
-			encryptedPass_hex = Hex.encodeHexString(encryptedPass);
+			
+			encryptedPass_hex = KeyPassManager.getInstance().getCryptoUtil().encrypt(password, salt);
 			
 			md = MessageDigest.getInstance("SHA1");
 			md.update((password+salt).getBytes());

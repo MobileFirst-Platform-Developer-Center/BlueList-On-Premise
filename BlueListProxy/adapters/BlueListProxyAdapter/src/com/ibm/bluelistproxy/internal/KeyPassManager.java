@@ -13,24 +13,17 @@ package com.ibm.bluelistproxy.internal;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 
 import com.cloudant.client.api.CloudantClient;
 import com.cloudant.client.api.Database;
+import com.ibm.bluelistproxy.internal.crypto.BlueListCrypto;
+import com.ibm.bluelistproxy.internal.crypto.BlueListCryptoBasic;
+import com.ibm.bluelistproxy.internal.crypto.BlueListCryptoNodejs;
 import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 import com.worklight.adapters.rest.api.ConfigurationAPI;
@@ -52,6 +45,9 @@ public class KeyPassManager {
 	
 	private CloudantClient adminCloudant = null;
 	private Map<String,CloudantClient> userCloudantCache = new HashMap<String,CloudantClient>();
+	
+	private boolean isNodejsCrypto = false;
+	private BlueListCrypto cryptoUtil = null;
 	
     
 	/**
@@ -114,6 +110,17 @@ public class KeyPassManager {
     	
     	// Return the singleton instance
     	return instance;
+    }
+    
+    public BlueListCrypto getCryptoUtil() {
+    	if ( cryptoUtil == null ) {
+    		if ( isNodejsCrypto ) {
+    			cryptoUtil = new BlueListCryptoNodejs();
+    		} else {
+    			cryptoUtil = new BlueListCryptoBasic();
+    		}
+    	}
+    	return cryptoUtil;
     }
 
     
@@ -322,6 +329,9 @@ public class KeyPassManager {
     		
     	}
     	
+    	//TODO: Remove
+    	userId = "james";
+    	
     	logger.exiting(CLASS_NAME, METHOD_NAME, userId);
     	return userId;
     }
@@ -415,6 +425,11 @@ public class KeyPassManager {
 	                        		
 	                                // If all fields are present, then update the corresponding config vars
 	                        		createAdminCredentials(cloudantProtocol, cloudantHost, cloudantPort, cloudantUsername, cloudantPassword);
+	                            	
+	                            	// Obtain USE_NODEJS_CRYPTO environment variable
+	                        		String useNodejsCrypto = System.getenv("USE_NODEJS_CRYPTO");
+	                                isNodejsCrypto = ( useNodejsCrypto != null  &&  useNodejsCrypto.equalsIgnoreCase( "true" ) );
+	                                logger.finest("USE_NODEJS_CRYPTO= " + useNodejsCrypto);
 	                                
 	                            }
 	                            else {
@@ -472,6 +487,11 @@ public class KeyPassManager {
     		
             // If all fields are present, then update the corresponding config vars
     		createAdminCredentials(cloudantProtocol, cloudantHost, cloudantPort, cloudantUsername, cloudantPassword);
+        	
+        	// Obtain USE_NODEJS_CRYPTO jndi variable
+    		String useNodejsCrypto = configAPI.getServerJNDIProperty("USE_NODEJS_CRYPTO");
+            isNodejsCrypto = ( useNodejsCrypto != null  &&  useNodejsCrypto.equalsIgnoreCase( "true" ) );
+            logger.finest("USE_NODEJS_CRYPTO= " + useNodejsCrypto);
             
         } else {
             logger.fine("ConfigurationAPI is null. This means the adapter API is not properly functioning and the configuration API cannot be obtained.");
@@ -505,6 +525,11 @@ public class KeyPassManager {
     		
             // If all fields are present, then update the corresponding config vars
     		createAdminCredentials(cloudantProtocol, cloudantHost, cloudantPort, cloudantUsername, cloudantPassword);
+        	
+        	// Obtain USE_NODEJS_CRYPTO MobileFirst property
+    		String useNodejsCrypto = configAPI.getMFPConfigurationProperty("USE_NODEJS_CRYPTO");
+            isNodejsCrypto = ( useNodejsCrypto != null  &&  useNodejsCrypto.equalsIgnoreCase( "true" ) );
+            logger.finest("USE_NODEJS_CRYPTO= " + useNodejsCrypto);
             
         } else {
             logger.fine("ConfigurationAPI is null. This means the adapter API is not properly functioning and the configuration API cannot be obtained.");
@@ -562,7 +587,7 @@ public class KeyPassManager {
 			// Pull password and salt from result and decrypt it
 			String encryptedPassword = (String)jsonObject.get("password");
 			String salt = (String)jsonObject.get("salt");
-			String password = decryptWithSalt(encryptedPassword, salt);
+			String password = getCryptoUtil().decrypt(encryptedPassword, salt);
 			
 			// If all fields obtained successfully, then create the user credentials
 			userCredentials = new HashMap<String,String>(5);
@@ -590,234 +615,6 @@ public class KeyPassManager {
 		logger.exiting(CLASS_NAME, METHOD_NAME);  // Do not log credentials
 		return userCredentials;
 	}
-
-    /**
-     * Encrypt the given password with the given salt value.
-     * 
-     * @param value The password.
-     * @param salt The salt value.
-     * @return The encrypted password.
-     * @throws BlueListProxyException Thrown if the password could not be encrypted.
-     */
-	public byte[] encryptWithSalt(String value, String salt)
-	throws BlueListProxyException {
-		final String METHOD_NAME = "encryptWithSalt";
-		logger.entering(CLASS_NAME, METHOD_NAME, new Object[] {(value != null ? "********" : "null"),(salt != null ? "********" : "null")});
-		
-		byte[] encryptedValue = null;
-		
-		try {
-			
-			byte[] keyb = salt.getBytes("UTF-8");
-			MessageDigest md = MessageDigest.getInstance("MD5");
-
-			int keySize = getMaxEncryptionBlockSize();
-			final byte[][] keyAndIV = EVP_BytesToKey(keySize, 16, md, keyb);
-			SecretKeySpec key = new SecretKeySpec(keyAndIV[0],"AES");
-			IvParameterSpec iv = new IvParameterSpec(keyAndIV[1]);
-			
-			byte[] decrypted = value.getBytes("UTF-8");
-			encryptedValue = encrypt(key, iv, decrypted);
-			
-		} catch(Exception e) {
-			logger.severe("Exception caught encrypting password with salt value; exception = " + e.getMessage());
-			throw new BlueListProxyException("Exception caught encrypting password with salt value", e);
-		}
-	
-		logger.exiting(CLASS_NAME, METHOD_NAME, (encryptedValue != null ? "********" : "null"));
-		return encryptedValue;
-	}
-
-    /**
-     * Decrypt the given password with the given salt.
-     * 
-     * @param value The encrypted password.
-     * @param salt The salt value.
-     * @return The decrypted password.
-     * @throws BlueListProxyException Thrown if the password could not be decrypted.
-     */
-	private String decryptWithSalt(String value, String salt) 
-	throws BlueListProxyException {
-		final String METHOD_NAME = "decryptWithSalt";
-		logger.entering(CLASS_NAME, METHOD_NAME, new Object[] {(value != null ? "********" : "null"),(salt != null ? "********" : "null")});
-		
-		String decryptedValue = null;
-		
-		try {
-
-			// Convert String to byte array
-			int len = value.length() / 2;
-			byte[] valueBytes = new byte[len];
-			for (int i = 0; i < len; i++) {
-				valueBytes[i] = Integer.valueOf(value.substring(2 * i, 2 * i + 2),16).byteValue();
-			}
-			
-			byte[] keyb = salt.getBytes("UTF-8");
-			MessageDigest md = MessageDigest.getInstance("MD5");
-
-			int keySize = getMaxEncryptionBlockSize();
-			final byte[][] keyAndIV = EVP_BytesToKey(keySize, 16, md, keyb);
-			SecretKeySpec key = new SecretKeySpec(keyAndIV[0],"AES");
-			IvParameterSpec iv = new IvParameterSpec(keyAndIV[1]);
-			byte[] decryptedBytes = decrypt(key, iv, valueBytes);
-			
-			decryptedValue = new String (decryptedBytes, "UTF-8");
-			
-		} catch(Exception e) {
-			logger.severe("Exception caught decrypting password with salt value; exception = " + e.getMessage());
-			throw new BlueListProxyException("Exception caught decrypting password with salt value", e);
-		}
-
-		logger.exiting(CLASS_NAME, METHOD_NAME, (decryptedValue != null ? "********" : "null"));
-		return decryptedValue;
-	}
-
-	/**
-	 * 
-	 * @param key_len
-	 * @param iv_len
-	 * @param md
-	 * @param data
-	 * @return
-	 */
-	private byte[][] EVP_BytesToKey(int key_len, int iv_len, MessageDigest md, byte[] data) {
-		final String METHOD_NAME = "EVP_BytesToKey";
-		logger.entering(CLASS_NAME, METHOD_NAME, new Object[] {key_len, iv_len, md, (data != null ? "********" : "null")});
-		
-		byte[][] both = new byte[2][];
-		byte[] key = new byte[key_len];
-		int key_ix = 0;
-		byte[] iv = new byte[iv_len];
-		int iv_ix = 0;
-		both[0] = key;
-		both[1] = iv;
-		byte[] md_buf = null;
-		int nkey = key_len;
-		int niv = iv_len;
-		int i = 0;
-
-		if (data == null) {
-			logger.exiting(CLASS_NAME, METHOD_NAME, (both != null ? "********" : "null"));
-			return both;
-		}
-
-		int addmd = 0;
-		for (;;) {
-			md.reset();
-			if (addmd++ > 0) {
-				md.update(md_buf);
-			}
-			md.update(data);
-
-			md_buf = md.digest();
-
-			i = 0;
-			if (nkey > 0) {
-				for (;;) {
-					if (nkey == 0)
-						break;
-					if (i == md_buf.length)
-						break;
-					key[key_ix++] = md_buf[i];
-					nkey--;
-					i++;
-				}
-			}
-			if (niv > 0 && i != md_buf.length) {
-				for (;;) {
-					if (niv == 0)
-						break;
-					if (i == md_buf.length)
-						break;
-					iv[iv_ix++] = md_buf[i];
-					niv--;
-					i++;
-				}
-			}
-			if (nkey == 0 && niv == 0) {
-				break;
-			}
-		}
-		for (i = 0; i < md_buf.length; i++) {
-			md_buf[i] = 0;
-		}
-
-		logger.exiting(CLASS_NAME, METHOD_NAME, (both != null ? "********" : "null"));
-		return both;
-	}
-
-	/**
-	 * 
-	 * @param key
-	 * @param iv
-	 * @param plain
-	 * @return
-	 * @throws InvalidKeyException
-	 * @throws InvalidAlgorithmParameterException
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 */
-	private byte[] encrypt(SecretKeySpec key, IvParameterSpec iv, byte[] plain) 
-	throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
-		   NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-		final String METHOD_NAME = "encrypt";
-		logger.entering(CLASS_NAME, METHOD_NAME, new Object[] {key, iv, (plain != null ? "********" : "null")});
-		
-		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-		byte[] encrypted = cipher.doFinal(plain);
-
-		logger.exiting(CLASS_NAME, METHOD_NAME, (encrypted != null ? "********" : "null"));
-		return encrypted;
-	}
-
-	/**
-	 * 
-	 * @param key
-	 * @param iv
-	 * @param encrypted
-	 * @return
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 * @throws InvalidKeyException
-	 * @throws InvalidAlgorithmParameterException
-	 * @throws IllegalBlockSizeException
-	 * @throws BadPaddingException
-	 */
-	private byte[] decrypt(SecretKeySpec key, IvParameterSpec iv, byte[] encrypted) 
-	throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-		   InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-		final String METHOD_NAME = "decrypt";
-		logger.entering(CLASS_NAME, METHOD_NAME, new Object[] {key, iv, (encrypted != null ? "********" : "null")});
-		
-		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-		cipher.init(Cipher.DECRYPT_MODE, key, iv);
-		byte[] clearbyte = cipher.doFinal(encrypted);
-
-		logger.exiting(CLASS_NAME, METHOD_NAME, (clearbyte != null ? "********" : "null"));
-		return clearbyte;
-	}
-
-	/**
-	 * 
-	 * @return
-	 */
-	private int getMaxEncryptionBlockSize(){
-		final String METHOD_NAME = "getMaxEncryptionBlockSize";
-		logger.entering(CLASS_NAME, METHOD_NAME);
-		
-		int maxBlockSize = 16;
-		try{
-			maxBlockSize = (Cipher.getMaxAllowedKeyLength("AES/CBC/PKCS5Padding") > 128 ? 32 : 16);
-		}catch(NoSuchAlgorithmException e){
-			maxBlockSize = 16;
-		}
-
-		logger.exiting(CLASS_NAME, METHOD_NAME, maxBlockSize);
-		return maxBlockSize;
-	}	
 	
 	/**
 	 * Decode the password with the Liberty/WAS encoding for On-premise
