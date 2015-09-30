@@ -329,9 +329,6 @@ public class KeyPassManager {
     		
     	}
     	
-    	//TODO: Remove
-    	userId = "james";
-    	
     	logger.exiting(CLASS_NAME, METHOD_NAME, userId);
     	return userId;
     }
