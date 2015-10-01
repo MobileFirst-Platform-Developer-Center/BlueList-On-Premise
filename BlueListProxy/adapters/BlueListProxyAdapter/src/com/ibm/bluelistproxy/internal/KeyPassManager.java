@@ -524,9 +524,13 @@ public class KeyPassManager {
     		createAdminCredentials(cloudantProtocol, cloudantHost, cloudantPort, cloudantUsername, cloudantPassword);
         	
         	// Obtain USE_NODEJS_CRYPTO MobileFirst property
-    		String useNodejsCrypto = configAPI.getMFPConfigurationProperty("USE_NODEJS_CRYPTO");
-            isNodejsCrypto = ( useNodejsCrypto != null  &&  useNodejsCrypto.equalsIgnoreCase( "true" ) );
-            logger.finest("USE_NODEJS_CRYPTO= " + useNodejsCrypto);
+    		try {
+    			String useNodejsCrypto = configAPI.getMFPConfigurationProperty("USE_NODEJS_CRYPTO");
+    			isNodejsCrypto = ( useNodejsCrypto != null  &&  useNodejsCrypto.equalsIgnoreCase( "true" ) );
+    		} catch (Exception e) {
+    			isNodejsCrypto = false;
+    		}
+            logger.finest("isNodejsCrypto= " + isNodejsCrypto);
             
         } else {
             logger.fine("ConfigurationAPI is null. This means the adapter API is not properly functioning and the configuration API cannot be obtained.");
