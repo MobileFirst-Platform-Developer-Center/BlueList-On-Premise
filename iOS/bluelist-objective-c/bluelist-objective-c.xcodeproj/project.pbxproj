@@ -33,6 +33,7 @@
 		491037381AAD2E5700321033 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 491037361AAD2E5700321033 /* InfoPlist.strings */; };
 		493CE8131A9CE0F90059EF3D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 493CE8121A9CE0F90059EF3D /* main.m */; };
 		49F950D51AADDFF4006D1721 /* worklight.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49F950D01AADDFF4006D1721 /* worklight.plist */; };
+		FA6881E91BC70226006D7E5A /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = FA6881E81BC70226006D7E5A /* Podfile */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,7 +57,7 @@
 		0BB6C20E1A3B518700BB7D1F /* bluelist-objective-cTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "bluelist-objective-cTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BB6C2131A3B518700BB7D1F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0BB6C2141A3B518700BB7D1F /* bluelist_objective_cTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = bluelist_objective_cTests.m; sourceTree = "<group>"; };
-		0BB6C21E1A3B59D600BB7D1F /* bluelist.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = bluelist.plist; sourceTree = "<group>"; };
+		0BB6C21E1A3B59D600BB7D1F /* bluelist.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = bluelist.plist; path = "bluelist-objective-c/bluelist.plist"; sourceTree = "<group>"; };
 		0BB6C2231A3B5A0900BB7D1F /* bluemix_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bluemix_logo.png; sourceTree = "<group>"; };
 		0BB6C2241A3B5A0900BB7D1F /* high.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = high.png; sourceTree = "<group>"; };
 		0BB6C2251A3B5A0900BB7D1F /* low.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = low.png; sourceTree = "<group>"; };
@@ -83,6 +84,7 @@
 		71A19C292BCADF83B738EE11 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC1650B7ACDECC043047F55E /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		D3F96B1F257AE10872FBECE9 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		FA6881E81BC70226006D7E5A /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,7 +117,9 @@
 		0BB6C1EC1A3B518600BB7D1F = {
 			isa = PBXGroup;
 			children = (
+				FA6881E81BC70226006D7E5A /* Podfile */,
 				49F950D01AADDFF4006D1721 /* worklight.plist */,
+				0BB6C21E1A3B59D600BB7D1F /* bluelist.plist */,
 				0BB6C1F71A3B518600BB7D1F /* bluelist-objective-c */,
 				0BB6C2111A3B518700BB7D1F /* bluelist-objective-cTests */,
 				0BB6C1F61A3B518600BB7D1F /* Products */,
@@ -157,7 +161,6 @@
 				491037351AAD2E5700321033 /* BlueList-Prefix.pch */,
 				491037361AAD2E5700321033 /* InfoPlist.strings */,
 				493CE8121A9CE0F90059EF3D /* main.m */,
-				0BB6C21E1A3B59D600BB7D1F /* bluelist.plist */,
 				0BB6C1F91A3B518600BB7D1F /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -337,6 +340,7 @@
 				0BB6C2041A3B518700BB7D1F /* Main.storyboard in Resources */,
 				0BB6C2091A3B518700BB7D1F /* LaunchScreen.xib in Resources */,
 				49F950D51AADDFF4006D1721 /* worklight.plist in Resources */,
+				FA6881E91BC70226006D7E5A /* Podfile in Resources */,
 				491037371AAD2E5700321033 /* BlueList-Info.plist in Resources */,
 				0BB6C2271A3B5A0900BB7D1F /* bluemix_logo.png in Resources */,
 				0BB6C2061A3B518700BB7D1F /* Images.xcassets in Resources */,

@@ -13,5 +13,5 @@
 # Cocoa Pods then adds the Frameworks and associated dependencies to your project.
 
 source 'https://github.com/CocoaPods/Specs.git'
-platform :ios, '7.0'
-pod 'IMFDataLocal/SQLCipher', '1.1.1'
+platform :ios, '8.0'
+pod 'CDTDatastore/SQLCipher'
