@@ -16,13 +16,12 @@
 
 
 #import "BlueListChallengeHandler.h"
-#import <IMFData/IMFData.h>
 
 @implementation BlueListChallengeHandler
 
 -(instancetype) init
 {
-    self = [super initWithRealm: CLOUDANT_SCOPE];
+    self = [super initWithRealm: @"cloudant"];
     return self;
 }
 

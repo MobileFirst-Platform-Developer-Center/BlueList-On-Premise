@@ -16,25 +16,12 @@
 
 
 #import <UIKit/UIKit.h>
-#import <CloudantToolkit/CloudantToolkit.h>
-#import <IMFData/IMFData.h>
-#import "DDASLLogger.h"
-#import "DDTTYLogger.h"
-#import "DDFileLogger.h"
-#import <CloudantSync.h>
-#import "BlueListChallengeHandler.h"
-
 
 #define IBM_SYNC_ENABLE YES
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-@property (nonatomic, retain) CDTStore* datastore;
-@property (nonatomic, retain) CDTStore* remotedatastore;
-@property (nonatomic, retain) CDTPullReplication *pull;
-@property (nonatomic, retain) CDTPushReplication *push;
-@property BOOL ready;
 
 @end
 
