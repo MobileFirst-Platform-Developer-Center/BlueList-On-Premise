@@ -65,9 +65,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.highImage = [UIImage imageNamed:@"priorityHigh.png"];
-    self.mediumImage = [UIImage imageNamed:@"priorityMedium.png"];
-    self.lowImage = [UIImage imageNamed:@"priorityLow.png"];
+    self.highImage = [UIImage imageNamed:@"PriorityHigh.png"];
+    self.mediumImage = [UIImage imageNamed:@"PriorityMedium.png"];
+    self.lowImage = [UIImage imageNamed:@"PriorityLow.png"];
     
     
     self.itemList = [[NSMutableArray alloc]init];
@@ -112,7 +112,7 @@
             [alert show];
         }else {
             NSLog(@"Authenticated user with id %@",userId);
-            [self enrollUser:userId completionHandler:^(NSString *dbname, NSError *error) {
+            [self enrollUserWithCompletionHandler:^(NSString *dbname, NSError *error) {
                 BOOL encryptionEnabled = NO;
                 if(error){
                     dispatch_sync(dispatch_get_main_queue(), ^{
@@ -233,7 +233,7 @@
     }];
 }
 
--(void) enrollUser: (NSString*) userId completionHandler: (void(^) (NSString*dbname, NSError *error)) completionHandler
+-(void) enrollUserWithCompletionHandler: (void(^) (NSString*dbname, NSError *error)) completionHandler
 {
     NSString *enrollUrlString = [NSString stringWithFormat:@"%@/enroll", self.bluelistProxyAdapterURL];
     NSURL *enrollUrl = [NSURL URLWithString:enrollUrlString];
