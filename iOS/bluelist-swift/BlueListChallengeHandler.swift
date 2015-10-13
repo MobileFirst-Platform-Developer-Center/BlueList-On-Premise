@@ -28,7 +28,6 @@ class BlueListChallengeHandler: ChallengeHandler {
 
     override func isCustomResponse(response: WLResponse!) -> Bool {
      
-        print(response.getResponseJson())
         if (response != nil && response.getResponseJson() != nil) {
             let responseJSON = response.getResponseJson() as NSDictionary
             let authRequired = responseJSON.objectForKey("authRequired") as! Bool?
@@ -57,4 +56,4 @@ class BlueListChallengeHandler: ChallengeHandler {
         submitFailure(response)
         
     }
-    }
+}

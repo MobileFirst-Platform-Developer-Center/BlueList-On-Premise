@@ -65,9 +65,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.highImage = [UIImage imageNamed:@"high.png"];
-    self.mediumImage = [UIImage imageNamed:@"medium.png"];
-    self.lowImage = [UIImage imageNamed:@"low.png"];
+    self.highImage = [UIImage imageNamed:@"priorityHigh.png"];
+    self.mediumImage = [UIImage imageNamed:@"priorityMedium.png"];
+    self.lowImage = [UIImage imageNamed:@"priorityLow.png"];
     
     
     self.itemList = [[NSMutableArray alloc]init];

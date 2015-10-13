@@ -21,13 +21,14 @@
 		49D1107B1AC07EEE00ABAE4E /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49D1107A1AC07EEE00ABAE4E /* MobileCoreServices.framework */; };
 		49D1107D1AC07EFE00ABAE4E /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49D1107C1AC07EFE00ABAE4E /* SystemConfiguration.framework */; };
 		49FE82B71AC1F0E500CD6486 /* ListTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972864121A38E9FD000AA1AF /* ListTableViewController.swift */; };
-		972864111A38E9F5000AA1AF /* TodoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972864101A38E9F5000AA1AF /* TodoItem.swift */; };
 		9728641B1A38EA24000AA1AF /* bluemix_logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 9728641A1A38EA24000AA1AF /* bluemix_logo.png */; };
 		9728641D1A38EA2D000AA1AF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9728641C1A38EA2D000AA1AF /* AppDelegate.swift */; };
 		972864211A38EA3B000AA1AF /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 972864201A38EA3B000AA1AF /* Images.xcassets */; };
 		972864261A38EA78000AA1AF /* bluelist.plist in Resources */ = {isa = PBXBuildFile; fileRef = 972864251A38EA78000AA1AF /* bluelist.plist */; };
 		9728642F1A38F5A4000AA1AF /* bluelist_swiftTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9728642E1A38F5A4000AA1AF /* bluelist_swiftTests.m */; };
 		AC792C6A3148770C1953426B /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D4E0252586402495363ECB33 /* libPods.a */; };
+		FA422C711BCC47CB001A1F87 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = FA422C701BCC47CB001A1F87 /* Podfile */; settings = {ASSET_TAGS = (); }; };
+		FA422C731BCC48BB001A1F87 /* CloudantHttpInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA422C721BCC48BB001A1F87 /* CloudantHttpInterceptor.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,7 +54,6 @@
 		49D110781AC07EE400ABAE4E /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		49D1107A1AC07EEE00ABAE4E /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		49D1107C1AC07EFE00ABAE4E /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
-		972864101A38E9F5000AA1AF /* TodoItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TodoItem.swift; path = "bluelist-swift/TodoItem.swift"; sourceTree = SOURCE_ROOT; };
 		972864121A38E9FD000AA1AF /* ListTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ListTableViewController.swift; path = "bluelist-swift/ListTableViewController.swift"; sourceTree = SOURCE_ROOT; };
 		9728641A1A38EA24000AA1AF /* bluemix_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = bluemix_logo.png; path = "bluelist-swift/bluemix_logo.png"; sourceTree = SOURCE_ROOT; };
 		9728641C1A38EA2D000AA1AF /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = "bluelist-swift/AppDelegate.swift"; sourceTree = SOURCE_ROOT; };
@@ -68,6 +68,8 @@
 		977B95421A0CFFA600731BA2 /* bluelist-swiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "bluelist-swiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAD5C71A3119A8632820627D /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		D4E0252586402495363ECB33 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA422C701BCC47CB001A1F87 /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; };
+		FA422C721BCC48BB001A1F87 /* CloudantHttpInterceptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CloudantHttpInterceptor.swift; path = "bluelist-swift/CloudantHttpInterceptor.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,12 +123,12 @@
 			name = authentication;
 			sourceTree = "<group>";
 		};
-		0BA503A51A3240B30050B558 /* model */ = {
+		0BA503A51A3240B30050B558 /* http */ = {
 			isa = PBXGroup;
 			children = (
-				972864101A38E9F5000AA1AF /* TodoItem.swift */,
+				FA422C721BCC48BB001A1F87 /* CloudantHttpInterceptor.swift */,
 			);
-			name = model;
+			name = http;
 			sourceTree = "<group>";
 		};
 		0BA503A61A3240D90050B558 /* controller */ = {
@@ -140,7 +142,9 @@
 		977B951D1A0CFFA600731BA2 = {
 			isa = PBXGroup;
 			children = (
+				FA422C701BCC47CB001A1F87 /* Podfile */,
 				49D1100C1AC052E400ABAE4E /* worklight.plist */,
+				972864251A38EA78000AA1AF /* bluelist.plist */,
 				977B95281A0CFFA600731BA2 /* bluelist-swift */,
 				977B95451A0CFFA600731BA2 /* bluelist-swiftTests */,
 				977B95271A0CFFA600731BA2 /* Products */,
@@ -162,7 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				0BA503A41A3240A50050B558 /* authentication */,
-				0BA503A51A3240B30050B558 /* model */,
+				0BA503A51A3240B30050B558 /* http */,
 				0BA503A61A3240D90050B558 /* controller */,
 				0B37224A1A25261300D9E5DF /* Images */,
 				0B5A90611A3A55D400BF407B /* SwiftExtensions */,
@@ -181,7 +185,6 @@
 			isa = PBXGroup;
 			children = (
 				972864271A38EA84000AA1AF /* Info.plist */,
-				972864251A38EA78000AA1AF /* bluelist.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -323,6 +326,7 @@
 				4992CC891AC2FE2C0002D1AD /* LaunchScreen.xib in Resources */,
 				972864211A38EA3B000AA1AF /* Images.xcassets in Resources */,
 				9728641B1A38EA24000AA1AF /* bluemix_logo.png in Resources */,
+				FA422C711BCC47CB001A1F87 /* Podfile in Resources */,
 				972864261A38EA78000AA1AF /* bluelist.plist in Resources */,
 				49D1100D1AC052E400ABAE4E /* worklight.plist in Resources */,
 			);
@@ -375,8 +379,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				972864111A38E9F5000AA1AF /* TodoItem.swift in Sources */,
 				9728641D1A38EA2D000AA1AF /* AppDelegate.swift in Sources */,
+				FA422C731BCC48BB001A1F87 /* CloudantHttpInterceptor.swift in Sources */,
 				49D1106F1AC0577900ABAE4E /* BlueListChallengeHandler.swift in Sources */,
 				49FE82B71AC1F0E500CD6486 /* ListTableViewController.swift in Sources */,
 			);
