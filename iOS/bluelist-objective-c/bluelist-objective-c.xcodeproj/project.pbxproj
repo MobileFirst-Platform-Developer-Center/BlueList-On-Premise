@@ -27,12 +27,13 @@
 		4902AF051A81461B0046F4E3 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4902AF041A81461B0046F4E3 /* libc++.dylib */; };
 		4902AF071A8146240046F4E3 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4902AF061A8146240046F4E3 /* libstdc++.6.dylib */; };
 		4902AF121A8157400046F4E3 /* BlueListChallengeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 4902AF111A8157400046F4E3 /* BlueListChallengeHandler.m */; };
-		490E3EF01A97BA3400EDCB18 /* TodoItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 490E3EEF1A97BA3400EDCB18 /* TodoItem.m */; };
 		491036D31AAD298600321033 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4902AEF81A8145F00046F4E3 /* SystemConfiguration.framework */; };
 		491037371AAD2E5700321033 /* BlueList-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 491037341AAD2E5700321033 /* BlueList-Info.plist */; };
 		491037381AAD2E5700321033 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 491037361AAD2E5700321033 /* InfoPlist.strings */; };
 		493CE8131A9CE0F90059EF3D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 493CE8121A9CE0F90059EF3D /* main.m */; };
 		49F950D51AADDFF4006D1721 /* worklight.plist in Resources */ = {isa = PBXBuildFile; fileRef = 49F950D01AADDFF4006D1721 /* worklight.plist */; };
+		FA2CAF771BC8324F000B18AF /* CloudantHttpInterceptor.m in Sources */ = {isa = PBXBuildFile; fileRef = FA2CAF761BC8324F000B18AF /* CloudantHttpInterceptor.m */; settings = {ASSET_TAGS = (); }; };
+		FA6881E91BC70226006D7E5A /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = FA6881E81BC70226006D7E5A /* Podfile */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,7 +57,7 @@
 		0BB6C20E1A3B518700BB7D1F /* bluelist-objective-cTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "bluelist-objective-cTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0BB6C2131A3B518700BB7D1F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0BB6C2141A3B518700BB7D1F /* bluelist_objective_cTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = bluelist_objective_cTests.m; sourceTree = "<group>"; };
-		0BB6C21E1A3B59D600BB7D1F /* bluelist.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = bluelist.plist; sourceTree = "<group>"; };
+		0BB6C21E1A3B59D600BB7D1F /* bluelist.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = bluelist.plist; path = "bluelist-objective-c/bluelist.plist"; sourceTree = "<group>"; };
 		0BB6C2231A3B5A0900BB7D1F /* bluemix_logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bluemix_logo.png; sourceTree = "<group>"; };
 		0BB6C2241A3B5A0900BB7D1F /* high.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = high.png; sourceTree = "<group>"; };
 		0BB6C2251A3B5A0900BB7D1F /* low.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = low.png; sourceTree = "<group>"; };
@@ -73,8 +74,6 @@
 		4902AF061A8146240046F4E3 /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
 		4902AF101A8157300046F4E3 /* BlueListChallengeHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlueListChallengeHandler.h; sourceTree = "<group>"; };
 		4902AF111A8157400046F4E3 /* BlueListChallengeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BlueListChallengeHandler.m; sourceTree = "<group>"; };
-		490E3EEE1A97BA3400EDCB18 /* TodoItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoItem.h; sourceTree = "<group>"; };
-		490E3EEF1A97BA3400EDCB18 /* TodoItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoItem.m; sourceTree = "<group>"; };
 		491037341AAD2E5700321033 /* BlueList-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "BlueList-Info.plist"; sourceTree = "<group>"; };
 		491037351AAD2E5700321033 /* BlueList-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "BlueList-Prefix.pch"; sourceTree = "<group>"; };
 		491037361AAD2E5700321033 /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = InfoPlist.strings; sourceTree = "<group>"; };
@@ -83,6 +82,9 @@
 		71A19C292BCADF83B738EE11 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC1650B7ACDECC043047F55E /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		D3F96B1F257AE10872FBECE9 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		FA2CAF751BC8324F000B18AF /* CloudantHttpInterceptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudantHttpInterceptor.h; sourceTree = "<group>"; };
+		FA2CAF761BC8324F000B18AF /* CloudantHttpInterceptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudantHttpInterceptor.m; sourceTree = "<group>"; };
+		FA6881E81BC70226006D7E5A /* Podfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,7 +117,9 @@
 		0BB6C1EC1A3B518600BB7D1F = {
 			isa = PBXGroup;
 			children = (
+				FA6881E81BC70226006D7E5A /* Podfile */,
 				49F950D01AADDFF4006D1721 /* worklight.plist */,
+				0BB6C21E1A3B59D600BB7D1F /* bluelist.plist */,
 				0BB6C1F71A3B518600BB7D1F /* bluelist-objective-c */,
 				0BB6C2111A3B518700BB7D1F /* bluelist-objective-cTests */,
 				0BB6C1F61A3B518600BB7D1F /* Products */,
@@ -137,8 +141,8 @@
 			isa = PBXGroup;
 			children = (
 				0BB6C2311A3B5BBF00BB7D1F /* authentication */,
-				0BB6C2321A3B5BCB00BB7D1F /* model */,
 				0BB6C2331A3B5BD800BB7D1F /* controller */,
+				FA2CAF741BC83225000B18AF /* http */,
 				0BB6C2341A3B5BF400BB7D1F /* images */,
 				0BB6C1FC1A3B518600BB7D1F /* AppDelegate.h */,
 				0BB6C1FD1A3B518600BB7D1F /* AppDelegate.m */,
@@ -157,7 +161,6 @@
 				491037351AAD2E5700321033 /* BlueList-Prefix.pch */,
 				491037361AAD2E5700321033 /* InfoPlist.strings */,
 				493CE8121A9CE0F90059EF3D /* main.m */,
-				0BB6C21E1A3B59D600BB7D1F /* bluelist.plist */,
 				0BB6C1F91A3B518600BB7D1F /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -187,15 +190,6 @@
 				4902AF111A8157400046F4E3 /* BlueListChallengeHandler.m */,
 			);
 			name = authentication;
-			sourceTree = "<group>";
-		};
-		0BB6C2321A3B5BCB00BB7D1F /* model */ = {
-			isa = PBXGroup;
-			children = (
-				490E3EEE1A97BA3400EDCB18 /* TodoItem.h */,
-				490E3EEF1A97BA3400EDCB18 /* TodoItem.m */,
-			);
-			name = model;
 			sourceTree = "<group>";
 		};
 		0BB6C2331A3B5BD800BB7D1F /* controller */ = {
@@ -241,6 +235,15 @@
 				AC1650B7ACDECC043047F55E /* Pods.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		FA2CAF741BC83225000B18AF /* http */ = {
+			isa = PBXGroup;
+			children = (
+				FA2CAF751BC8324F000B18AF /* CloudantHttpInterceptor.h */,
+				FA2CAF761BC8324F000B18AF /* CloudantHttpInterceptor.m */,
+			);
+			name = http;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -337,6 +340,7 @@
 				0BB6C2041A3B518700BB7D1F /* Main.storyboard in Resources */,
 				0BB6C2091A3B518700BB7D1F /* LaunchScreen.xib in Resources */,
 				49F950D51AADDFF4006D1721 /* worklight.plist in Resources */,
+				FA6881E91BC70226006D7E5A /* Podfile in Resources */,
 				491037371AAD2E5700321033 /* BlueList-Info.plist in Resources */,
 				0BB6C2271A3B5A0900BB7D1F /* bluemix_logo.png in Resources */,
 				0BB6C2061A3B518700BB7D1F /* Images.xcassets in Resources */,
@@ -395,8 +399,8 @@
 				0BB6C1FE1A3B518600BB7D1F /* AppDelegate.m in Sources */,
 				4902AF121A8157400046F4E3 /* BlueListChallengeHandler.m in Sources */,
 				0BB6C22F1A3B5A2900BB7D1F /* TableViewController.m in Sources */,
+				FA2CAF771BC8324F000B18AF /* CloudantHttpInterceptor.m in Sources */,
 				493CE8131A9CE0F90059EF3D /* main.m in Sources */,
-				490E3EF01A97BA3400EDCB18 /* TodoItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

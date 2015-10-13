@@ -16,9 +16,8 @@
 
 
 #import <UIKit/UIKit.h>
-#import <IMFData/IMFData.h>
+#import <CloudantSync.h>
+
 @interface TableViewController : UITableViewController
-@property (nonatomic, retain) CDTPullReplication *pull;
-@property (nonatomic, retain) CDTPushReplication *push;
-@property BOOL ready;
+
 @end
