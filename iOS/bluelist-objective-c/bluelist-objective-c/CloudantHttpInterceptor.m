@@ -106,37 +106,6 @@
                     completionHandler([NSError errorWithDomain:@"BlueList" code:42 userInfo:@{NSLocalizedDescriptionKey : @"No JSON data returned from enroll call.  Check NodeJS application on Bluemix"}]);
                 }
             }];
-//            NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.refreshSessionCookieUrl];
-//            request.HTTPMethod = @"POST";
-//            [request addValue:[[IMFAuthorizationManager sharedInstance]cachedAuthorizationHeader] forHTTPHeaderField:@"Authorization"];
-//
-//
-//            [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-//                if(error){
-//                    completionHandler(error);
-//                    return;
-//                }
-//                
-//                NSInteger httpStatus = ((NSHTTPURLResponse*)response).statusCode;
-//                if(httpStatus != 200){
-//                    completionHandler([NSError errorWithDomain:@"BlueList" code:42 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Invalid HTTP Status %ld.  Check NodeJS application on Bluemix", httpStatus]}]);
-//                    return;
-//                }
-//                
-//                if(data){
-//                    NSError *jsonError = nil;
-//                    NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData: data options:0 error: &jsonError];
-//                    if(!jsonError && jsonObject){
-//                        NSString *sessionCookie = jsonObject[@"sessionCookie"];
-//                        self.sessionCookie = sessionCookie;
-//                        completionHandler(nil);
-//                    }else{
-//                        completionHandler(jsonError);
-//                    }
-//                }else{
-//                    completionHandler([NSError errorWithDomain:@"BlueList" code:42 userInfo:@{NSLocalizedDescriptionKey : @"No JSON data returned from enroll call.  Check NodeJS application on Bluemix"}]);
-//                }
-//            }] resume];
         }
     }];
 }

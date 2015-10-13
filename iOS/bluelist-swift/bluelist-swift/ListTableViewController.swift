@@ -18,7 +18,11 @@ import UIKit
 
 
 class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTReplicatorDelegate{
-
+    let DATATYPE_FIELD = "@datatype"
+    let DATATYPE_VALUE = "TodoItem"
+    
+    let NAME_FIELD = "name"
+    let PRIORITY_FIELD = "priority"
     
     //Priority Images
     var highImage   = UIImage(named: "priorityHigh.png")
@@ -31,17 +35,19 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     
     //Intialize some list items
-    var itemList: [TodoItem] = []
-    var filteredListItems = [TodoItem]()
+    var itemList: [CDTDocumentRevision] = []
+    var filteredListItems = [CDTDocumentRevision]()
     
     var idTracker = 0
-
+    
     // Cloud sync properties
-    var dbName:String = "todosdb"
-    var datastore: CDTStore!
-    var remoteStore: CDTStore!
-    var cloudantProxyURL:String = ""
-    var encryptionPassword:String = ""
+    var dbName:String!
+    var datastore: CDTDatastore!
+    var datastoreManager:CDTDatastoreManager!
+    var remotedatastoreurl: NSURL!
+    var cloudantHttpInterceptor:CDTHTTPInterceptor!
+    var bluelistProxyAdapterURL:String!
+    
     var replicatorFactory: CDTReplicatorFactory!
     
     var pullReplication: CDTPullReplication!
@@ -60,9 +66,9 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         self.refreshControl = UIRefreshControl()
         self.refreshControl?.addTarget(self, action: Selector("handleRefreshAction") , forControlEvents: UIControlEvents.ValueChanged)
         self.refreshControl?.beginRefreshing()
-      self.setupIMFDatabase(self.dbName)
+        self.setupIMFDatabase()
         
-      
+        
     }
     
     override func didReceiveMemoryWarning() {
@@ -73,150 +79,233 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     //MARK: - Data Management
     
-    func setupIMFDatabase(dbName: String) {
-        var dbName = dbName
-        var hasValidConfiguration:Bool = true
+    func setupIMFDatabase() {
         var encryptionEnabled:Bool = false
         let configurationPath = NSBundle.mainBundle().pathForResource("bluelist", ofType: "plist")
-        if((configurationPath) != nil){
-            let configuration = NSDictionary(contentsOfFile: configurationPath!)
-            cloudantProxyURL = configuration?["cloudantProxyUrl"] as! String
-            if(cloudantProxyURL.isEmpty){
-                 hasValidConfiguration = false
-                 NSLog("%@", "Open the bluelist.plist and set the cloudantProxyUrl");
-            }
-            encryptionPassword = configuration?["encryptionPassword"] as! String
-            if(encryptionPassword.isEmpty){
-                encryptionEnabled = false
-            }
-            else {
-                encryptionEnabled = true
-                dbName = dbName + "secure"
-            }
-        }
-        //Create local data store
-        if(hasValidConfiguration){
-        var error:NSError?
-        //CDTEncryptionKeyProvider used for encrypting local datastore
-        var keyProvider:CDTEncryptionKeyProvider!
-        let manager:IMFDataManager = IMFDataManager.initializeWithUrl(cloudantProxyURL)
-            //create a local data store. Encrypt the local store if the setting is enabled
-            if (encryptionEnabled){
-                //Initialize the key provider
-                keyProvider = CDTEncryptionKeychainProvider(password: encryptionPassword, forIdentifier:"bluelist")
-                NSLog("%@", "Attempting to create an encrypted local data store")
-                do {
-                    //Initialize the encrypted store
-                    self.datastore = try manager.localStore(dbName, withEncryptionKeyProvider: keyProvider)
-                } catch let error1 as NSError {
-                    error = error1
-                    self.datastore = nil
-                }
-            }
-            else{
-                NSLog("%@","Attempting to create a local data store")
-                do {
-                    self.datastore = try manager.localStore(dbName)
-                } catch let error1 as NSError {
-                    error = error1
-                    self.datastore = nil
-                }
-            }
-            if ((error) != nil) {
-                NSLog("%@", "Could not create local data store with name " + dbName)
-                if(encryptionEnabled){
-                    let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not create an encrypted local store with credentials provided. Check the encryptionPassword in the bluelist.plist file.", delegate:self , cancelButtonTitle: "Okay")
-                    alert.show()
-                    return
-                }
-            }
-            else{
-                NSLog("%@", "Local data store create successfully: " + dbName)
-            }
-            
-            if (!IBM_SYNC_ENABLE) {
-                self.listItems({ () -> Void in
-                    NSLog("%@","Done refreshing table after replication")
-                    self.refreshControl?.endRefreshing()
-                    
-                })
-
-            }
-         //Create remote data store
-            manager.remoteStore(dbName as String, completionHandler: { (store, error) -> Void in
-                if (error != nil) {  NSLog("%@","Error creating remote data store \(error)")
-                    }
-                    else {
-                    NSLog("%@","Created remote data store successfully")
-                        self.remoteStore = store
-                        manager.setCurrentUserPermissions(DB_ACCESS_GROUP_MEMBERS, forStoreName: dbName as String, completionHander: { (success, error) -> Void in
-                            if (error != nil) {
+        let configuration = NSDictionary(contentsOfFile: configurationPath!)
+        let encryptionPassword = configuration?["encryptionPassword"] as! String
+        self.bluelistProxyAdapterURL = configuration?["bluelistProxyAdapterURL"] as! String
+        
+        self.obtainUser { (userId, error) -> Void in
+            if(error != nil){
+                // FIXMEKH handle error
+            }else{
+                NSLog("Authenticated users with id \(userId)")
+                self.enrollUser(userId!, completionHandler: { (error) -> Void in
+                    if(error != nil){
+                        // FIXMEKH do something here
+                    }else{
+                        if(encryptionPassword.isEmpty){
+                            encryptionEnabled = false
+                        }
+                        else {
+                            encryptionEnabled = true
+                            self.dbName = self.dbName + "secure"
+                        }
+                        
+                        // Create DatastoreManager
+                        let fileManager = NSFileManager()
+                        
+                        let documentDir = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).last
+                        let storeUrl = documentDir?.URLByAppendingPathComponent("bluelistdir", isDirectory: true)
+                        
+                        let exists = fileManager.fileExistsAtPath((storeUrl?.path)!)
+                        
+                        if(!exists){
+                            do{
+                                try fileManager.createDirectoryAtURL(storeUrl!, withIntermediateDirectories: true, attributes: nil)
+                            }catch let error as NSError{
+                                let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not create CDTDatastoreManager with directory \(storeUrl?.absoluteString).  Error: \(error)", delegate:self , cancelButtonTitle: "Okay")
+                                alert.show()
+                                return
                             }
-                            self.replicatorFactory = manager.replicatorFactory
-                            if(encryptionEnabled){
-                                self.pullReplication = manager.pullReplicationForStore(dbName, withEncryptionKeyProvider:keyProvider)
-                                self.pushReplication = manager.pushReplicationForStore(dbName, withEncryptionKeyProvider:keyProvider)
+                        }
+                        
+                        do{
+                            self.datastoreManager = try CDTDatastoreManager(directory: storeUrl?.path)
+                        }catch let error as NSError{
+                            let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not create CDTDatastoreManager with directory \(storeUrl?.absoluteString).  Error: \(error)", delegate:self , cancelButtonTitle: "Okay")
+                            alert.show()
+                            return
+                        }
+                        
+                        //CDTEncryptionKeyProvider used for encrypting local datastore
+                        var keyProvider:CDTEncryptionKeyProvider!
+                        
+                        //create a local data store. Encrypt the local store if the setting is enabled
+                        if(encryptionEnabled){
+                            //Initialize the key provider
+                            keyProvider = CDTEncryptionKeychainProvider(password: encryptionPassword, forIdentifier:"bluelist")
+                            NSLog("%@", "Attempting to create an encrypted local data store")
+                            do {
+                                //Initialize the encrypted store
+                                self.datastore = try self.datastoreManager.datastoreNamed(self.dbName, withEncryptionKeyProvider: keyProvider)
+                            } catch _ {
+                                self.datastore = nil
+                                NSLog("%@", "Could not create local data store with name " + self.dbName)
+                                if(encryptionEnabled){
+                                    let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not create an encrypted local store with credentials provided. Check the encryptionPassword in the bluelist.plist file.", delegate:self , cancelButtonTitle: "Okay")
+                                    alert.show()
+                                    return
+                                }
                             }
-                            else{
-                                self.pullReplication = manager.pullReplicationForStore(dbName)
-                                self.pushReplication = manager.pushReplicationForStore(dbName)
+                        }
+                        else{
+                            NSLog("%@","Attempting to create a local data store")
+                            do {
+                                self.datastore = try self.datastoreManager.datastoreNamed(self.dbName)
+                            } catch _ {
+                                self.datastore = nil
+                                NSLog("%@", "Could not create local data store with name " + self.dbName)
+                                if(encryptionEnabled){
+                                    let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not create an encrypted local store with credentials provided. Check the encryptionPassword in the bluelist.plist file.", delegate:self , cancelButtonTitle: "Okay")
+                                    alert.show()
+                                    return
+                                }
                                 
                             }
-
-                            self.pullItems()
-                        })
+                        }
+                        
+                        NSLog("%@", "Local data store create successfully: " + self.dbName)
+                        
+                        // Setup required indexes for Query
+                        self.datastore.ensureIndexed([self.DATATYPE_FIELD], withName: "datatypeindex")
+                        
+                        if (!IBM_SYNC_ENABLE) {
+                            self.listItems({ () -> Void in
+                                NSLog("Done refreshing we are not using cloud")
+                                self.refreshControl?.endRefreshing()
+                            })
+                            return
+                        }
+                        self.replicatorFactory = CDTReplicatorFactory(datastoreManager: self.datastoreManager)
+                        
+                        self.pullReplication = CDTPullReplication(source: self.remotedatastoreurl, target: self.datastore)
+                        self.pullReplication.addInterceptor(self.cloudantHttpInterceptor)
+                        
+                        self.pushReplication = CDTPushReplication(source: self.datastore, target: self.remotedatastoreurl)
+                        self.pushReplication.addInterceptor(self.cloudantHttpInterceptor)
+                        
+                        self.pullItems()
+                    }
+                })
+            }
+        }
+    }
+    
+    func obtainUser(completionHandler:(userId:String?, error:NSError?)->Void){
+        let authManager:WLAuthorizationManager = WLAuthorizationManager.sharedInstance()
+        authManager.obtainAuthorizationHeaderForScope("cloudant") { (response, error) -> Void in
+            if(error != nil){
+                completionHandler(userId: nil, error: error)
+            }else{
+                var errorMsg: String = ""
+                let responseText = response.responseText
+                if let userIdentity = authManager.userIdentity as NSDictionary?{
+                    if let userId = userIdentity.valueForKey("id") as! String? {
+                        completionHandler(userId: userId, error: nil)
+                    }else{
+                        // Handle error
+                        errorMsg += "\(responseText)\n"
+                        completionHandler(userId: nil, error: NSError(domain: "BlueList", code: 42, userInfo: [NSLocalizedDescriptionKey : errorMsg]))
+                    }
+                }else{
+                    // Handle error
+                    errorMsg += "\(responseText)\n"
+                    completionHandler(userId: nil, error: NSError(domain: "BlueList", code: 42, userInfo: [NSLocalizedDescriptionKey : errorMsg]))
                 }
-
-            })
-            self.datastore.mapper.setDataType("TodoItem", forClassName: NSStringFromClass(TodoItem.classForCoder()))
-
+                
+            }
         }
-       
-            return
+    }
+    
+    func enrollUser(userId:String, completionHandler:(error:NSError?)->Void){
+        let enrollUrlString = "\(self.bluelistProxyAdapterURL)/enroll"
+        let enrollUrl = NSURL(string: enrollUrlString)
+        
+        let request:WLResourceRequest = WLResourceRequest(URL: enrollUrl, method: "PUT")
+        request.sendWithCompletionHandler { (response, error) -> Void in
+            if(error != nil){
+                completionHandler(error: error);
+                return;
+            }
+            
+            let httpStatus = response.status
+            if(httpStatus != 200){
+                completionHandler(error: NSError(domain: "BlueList", code: 42, userInfo: [NSLocalizedDescriptionKey : "Invalid HTTP Status \(httpStatus).  Check NodeJS application on Bluemix"]))
+                return;
+            }
+            
+            let data:NSData? = response.responseData
+            if(data != nil){
+                do{
+                    let jsonObject:NSDictionary = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions(rawValue: 0)) as! NSDictionary
+                    let cloudantAccess:NSDictionary = jsonObject["cloudant_access"] as! NSDictionary
+                    let cloudantHost:String = cloudantAccess["host"]! as! String
+                    let cloudantPort:String = cloudantAccess["port"]! as! String
+                    let cloudantProtocol:String = cloudantAccess["protocol"]! as! String
+                    self.dbName = jsonObject["database"]! as? String
+                    let sessionCookie = jsonObject["sessionCookie"]! as! String
+                    
+                    let dbName:String = self.dbName!
+                    let remotedatastoreurlstring:String = "\(cloudantProtocol)://\(cloudantHost):\(cloudantPort)/\(dbName)"
+                    self.remotedatastoreurl = NSURL(string: remotedatastoreurlstring)
+                    let refreshUrlString:String = "\(self.bluelistProxyAdapterURL)/sessioncookie"
+                    
+                    self.cloudantHttpInterceptor = CloudantHttpInterceptor(sessionCookie: sessionCookie, refreshSessionCookieUrl: NSURL(string: refreshUrlString)!)
+                    completionHandler(error: nil)
+                }catch let error as NSError{
+                    completionHandler(error: NSError(domain: "BlueList", code: 42, userInfo: [NSLocalizedDescriptionKey : "No JSON data returned from enroll call.  Check NodeJS application on Bluemix. Error: \(error)"]))
+                }
+            }
         }
-
+    }
+    
     func listItems(cb:()->Void) {
-            var query:CDTQuery
-            query = CDTCloudantQuery(dataType: "TodoItem")
-            self.datastore.performQuery(query, completionHandler: { (results, error) -> Void in
-                if((error) != nil) {
-                }
-                else{
-                    self.itemList = results as! [TodoItem]
-                    self.reloadLocalTableData()
-                }
-                cb()
+        NSLog("listItems called")
+        let resultSet:CDTQResultSet = self.datastore.find([DATATYPE_FIELD : DATATYPE_VALUE])
+        var results:[CDTDocumentRevision] = Array()
+        
+        resultSet.enumerateObjectsUsingBlock { (rev, idx, stop) -> Void in
+            results.append(rev)
+        }
+        
+        self.itemList = results
+        self.reloadLocalTableData()
+        cb()
+    }
+    
+    func createItem(item: CDTMutableDocumentRevision) {
+        do{
+            try self.datastore.createDocumentFromRevision(item)
+            self.listItems({ () -> Void in
+                NSLog("Item succesfuly created")
             })
+        }catch let error as NSError{
+            NSLog("createItem failed with error \(error.description)")
+        }
     }
     
-    func createItem(item: TodoItem) {
-        self.datastore.save(item, completionHandler: { (object, error) -> Void in
-            if(error != nil){
-            } else {
-                self.listItems({ () -> Void in
-                })
-            }
-        })
+    func updateItem(item: CDTMutableDocumentRevision) {
+        do{
+            try self.datastore.updateDocumentFromRevision(item)
+            self.listItems({ () -> Void in
+                NSLog("Item successfully updated")
+            })
+        }catch let error as NSError{
+            NSLog("updateItem failed with error \(error.description)")
+        }
     }
     
-    func updateItem(item: TodoItem) {
-        self.datastore.save(item, completionHandler: { (object, error) -> Void in
-            if(error != nil){
-            } else {
-                self.listItems({ () -> Void in
-                })
-            }
-        })
-    }
-    
-    func deleteItem(item: TodoItem) {
-        self.datastore.delete(item, completionHandler: { (deletedObjectId, deletedRevisionId, error) -> Void in
-            if(error != nil){
-            } else {
-                self.listItems({ () -> Void in
-                })
-            }
-        })
+    func deleteItem(item: CDTDocumentRevision) {
+        do{
+            try self.datastore.deleteDocumentFromRevision(item)
+            self.listItems({ () -> Void in
+                NSLog("Item successfully deleted")
+            })
+        }catch let error as NSError{
+            NSLog("deleteItem failed with error \(error)")
+        }
     }
     
     // MARK: - Cloud Sync
@@ -225,11 +314,12 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         var error:NSError?
         do {
             self.pullReplicator = try self.replicatorFactory.oneWay(self.pullReplication)
-        } catch var error1 as NSError {
+        } catch let error1 as NSError {
             error = error1
             self.pullReplicator = nil
         }
         if(error != nil){
+            NSLog("Error creating oneWay pullReplicator \(error)")
         }
         
         self.pullReplicator.delegate = self
@@ -240,7 +330,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         print("Replicating data with NoSQL Database on the cloud")
         do {
             try self.pullReplicator.start()
-        } catch var error1 as NSError {
+        } catch let error1 as NSError {
             error = error1
         }
         if(error != nil){
@@ -251,11 +341,12 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         var error:NSError?
         do {
             self.pushReplicator = try self.replicatorFactory.oneWay(self.pushReplication)
-        } catch var error1 as NSError {
+        } catch let error1 as NSError {
             error = error1
             self.pushReplicator = nil
         }
         if(error != nil){
+            NSLog("Error starting pushReplicator \(error)")
         }
         
         self.pushReplicator.delegate = self
@@ -265,13 +356,14 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         error = nil
         do {
             try self.pushReplicator.start()
-        } catch var error1 as NSError {
+        } catch let error1 as NSError {
             error = error1
         }
         if(error != nil){
+            NSLog("Error starting pushReplicator \(error)")
         }
         
-
+        
     }
     
     // MARK: - CDTReplicator delegate methods
@@ -286,8 +378,8 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     * Called whenever the replicator changes progress
     */
     func replicatorDidChangeProgress(replicator: CDTReplicator!) {
-    
-
+        
+        
     }
     
     /**
@@ -302,18 +394,18 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
             self.pushItems()
         } else {
             //doing push, push is done read items from local data store and end the refresh UI
-           
-           
+            
+            
             self.listItems({ () -> Void in
-               NSLog("%@","Done refreshing table after replication")
+                NSLog("%@","Done refreshing table after replication")
                 self.refreshControl?.attributedTitle = NSAttributedString(string: "  ")
                 self.refreshControl?.endRefreshing()
                 
-             
+                
             })
-        
+            
         }
-    
+        
     }
     
     /**
@@ -327,7 +419,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
             self.refreshControl?.endRefreshing()
         })
     }
-
+    
     
     // MARK: - Table view data source
     
@@ -348,18 +440,18 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
-            let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell", forIndexPath: indexPath) 
-            let item = self.filteredListItems[indexPath.row] as TodoItem
+            let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell", forIndexPath: indexPath)
+            let item = self.filteredListItems[indexPath.row] as CDTDocumentRevision
             
             // Configure the cell
-            cell.imageView?.image = self.getPriorityImage(item.priority.integerValue)
+            cell.imageView?.image = self.getPriorityImage(item.body()[PRIORITY_FIELD]!.integerValue)
             let textField = cell.contentView.viewWithTag(3) as! UITextField
             textField.hidden = false
-            textField.text = item.name as String
+            textField.text = item.body()[NAME_FIELD]! as? String
             cell.contentView.tag = 0
             return cell
         } else {
-            let cell = tableView.dequeueReusableCellWithIdentifier("AddCell", forIndexPath: indexPath) 
+            let cell = tableView.dequeueReusableCellWithIdentifier("AddCell", forIndexPath: indexPath)
             cell.contentView.tag = 1
             return cell
         }
@@ -369,7 +461,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return indexPath.section == 0
     }
-
+    
     // Override to support editing the table view.
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
@@ -392,12 +484,16 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     func changePriorityForCell(cell: UITableViewCell){
         let indexPath = self.tableView.indexPathForCell(cell)
-        let item = self.filteredListItems[indexPath!.row] as TodoItem
-        let selectedPriority = item.priority.integerValue
+        let item = (self.filteredListItems[indexPath!.row] as CDTDocumentRevision).mutableCopy()
+        let selectedPriority = item.body()[PRIORITY_FIELD]!.integerValue
         let newPriority = self.getNextPriority(selectedPriority)
-        item.priority = NSNumber(integer: newPriority)
-        cell.imageView?.image = self.getPriorityImage(newPriority)
-        self.updateItem(item)
+        item.body()[PRIORITY_FIELD] = NSNumber(integer: newPriority)
+        
+        //update UI in main thread
+        dispatch_async(dispatch_get_main_queue()) {
+            cell.imageView?.image = self.getPriorityImage(newPriority)
+            self.updateItem(item)
+        }
     }
     
     func getNextPriority(currentPriority: Int) -> Int {
@@ -446,7 +542,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         return priority
     }
     
-
+    
     // MARK: Custom filtering
     
     func filterContentForPriority(scope: String = "All") {
@@ -454,8 +550,8 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         let priority = self.getPriorityForString(scope)
         
         if(priority == 1 || priority == 2){
-            self.filteredListItems = self.itemList.filter({ (item: TodoItem) -> Bool in
-                if item.priority.integerValue == priority {
+            self.filteredListItems = self.itemList.filter({ (item: CDTDocumentRevision) -> Bool in
+                if item.body()[PRIORITY_FIELD]!.integerValue == priority {
                     return true
                 } else {
                     return false
@@ -492,27 +588,30 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     func updateItemFromtextField(textField: UITextField) {
         let cell = textField.superview?.superview as! UITableViewCell
         let indexPath = self.tableView.indexPathForCell(cell)
-        let item = self.filteredListItems[indexPath!.row]
-        item.name = textField.text!
+        let item = self.filteredListItems[indexPath!.row].mutableCopy()
+        item.body()[NAME_FIELD] = textField.text!
         self.updateItem(item)
     }
     func addItemFromtextField(textField: UITextField) {
         let priority = self.getPriorityForString(self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
         let name = textField.text
-        var item = TodoItem()
-        item.name = textField.text!
-        item.priority = NSNumber(integer: priority)
+        let item = CDTMutableDocumentRevision()
+        item.setBody([DATATYPE_FIELD : DATATYPE_VALUE, NAME_FIELD : name!, PRIORITY_FIELD : NSNumber(integer: priority)])
+        
         self.createItem(item)
         textField.text = ""
     }
     
+    
     func reloadLocalTableData() {
         self.filterContentForPriority(self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
-        self.filteredListItems.sortInPlace { (item1: TodoItem, item2: TodoItem) -> Bool in
-            return item1.name.localizedCaseInsensitiveCompare(item2.name as String) == .OrderedAscending
+        self.filteredListItems.sortInPlace { (item1: CDTDocumentRevision, item2: CDTDocumentRevision) -> Bool in
+            return item1.body()[NAME_FIELD]!.localizedCaseInsensitiveCompare(item2.body()[NAME_FIELD]! as! String) == .OrderedAscending
         }
         if self.tableView != nil {
-            self.tableView.reloadData()
+            dispatch_async(dispatch_get_main_queue()) {
+                self.tableView.reloadData()
+            }
         }
     }
     
