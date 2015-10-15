@@ -88,12 +88,14 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         
         self.obtainUser { (userId, error) -> Void in
             if(error != nil){
-                // FIXMEKH handle error
+                let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not obtain user from WLAuthorizationManager.  Error: \(error)", delegate:self , cancelButtonTitle: "Okay")
+                alert.show()
             }else{
                 NSLog("Authenticated users with id \(userId)")
-                self.enrollUser(userId!, completionHandler: { (error) -> Void in
+                self.enrollUser({ (error) -> Void in
                     if(error != nil){
-                        // FIXMEKH do something here
+                        let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not enroll user with adapter.  Error: \(error)", delegate:self , cancelButtonTitle: "Okay")
+                        alert.show()
                     }else{
                         if(encryptionPassword.isEmpty){
                             encryptionEnabled = false
@@ -219,7 +221,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         }
     }
     
-    func enrollUser(userId:String, completionHandler:(error:NSError?)->Void){
+    func enrollUser(completionHandler:(error:NSError?)->Void){
         let enrollUrlString = "\(self.bluelistProxyAdapterURL)/enroll"
         let enrollUrl = NSURL(string: enrollUrlString)
         
