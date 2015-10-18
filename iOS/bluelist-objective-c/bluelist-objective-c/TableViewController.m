@@ -1,17 +1,18 @@
-// Copyright 2014, 2015 IBM Corp. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+/**
+* Copyright 2015 IBM Corp.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 #import "TableViewController.h"
 #import "AppDelegate.h"
 #import <CloudantSync.h>
@@ -68,20 +69,20 @@
     self.highImage = [UIImage imageNamed:@"PriorityHigh.png"];
     self.mediumImage = [UIImage imageNamed:@"PriorityMedium.png"];
     self.lowImage = [UIImage imageNamed:@"PriorityLow.png"];
-    
-    
+
+
     self.itemList = [[NSMutableArray alloc]init];
     self.filteredListItems = [[NSMutableArray alloc]init];
-    
+
     [self setupIMFDatabase];
-    
+
     // Setting up the refresh control
     self.settingsButton.enabled = false;
     self.refreshControl = [[UIRefreshControl alloc]init];
     [self.refreshControl addTarget:self action:@selector(handleRefreshAction) forControlEvents:UIControlEventValueChanged];
-    
+
     [self.refreshControl beginRefreshing];
-    
+
     //logger
     NSLog(@"this is a info test log in ListTableViewController:viewDidLoad");
 }
@@ -99,7 +100,7 @@
     NSDictionary *configuration = [NSDictionary dictionaryWithContentsOfFile:configurationPath];
     NSString *encryptionPassword = configuration[@"encryptionPassword"];
     self.bluelistProxyAdapterURL = configuration[@"bluelistProxyAdapterURL"];
-    
+
     [self obtainUser:^(NSString *userId, NSError *error) {
         NSMutableString *errorMsg = [[NSMutableString alloc] init];
         if(error || !userId){
@@ -130,21 +131,21 @@
                         encryptionEnabled = YES;
                         self.dbName = [self.dbName stringByAppendingString:@"secure"];
                     }
-                    
+
                     //create CDTEncryptionKeyProvider
                     id<CDTEncryptionKeyProvider> keyProvider=nil;
                     NSError *error = nil;
-                    
-                    
+
+
                     // Create CDTDatastoreManager
                     NSFileManager *fileManager= [NSFileManager defaultManager];
                     NSURL *documentsDir = [[fileManager URLsForDirectory:NSDocumentDirectory
                                                                inDomains:NSUserDomainMask] lastObject];
                     NSURL *storeURL = [documentsDir URLByAppendingPathComponent: @"bluelistdir"];
-                    
+
                     BOOL isDir;
                     BOOL exists = [fileManager fileExistsAtPath:[storeURL path] isDirectory:&isDir];
-                    
+
                     if (exists && !isDir) {
                         if (error) {
                             NSLog(@"DBCreationFailure: Could not create CDTDatastoreManager with directory %@.", documentsDir);
@@ -153,7 +154,7 @@
                         }
                         return;
                     }
-                    
+
                     if (!exists) {
                         [fileManager createDirectoryAtURL:storeURL withIntermediateDirectories:YES attributes:nil error:&error];
                         if(error){
@@ -163,7 +164,7 @@
                             return;
                         }
                     }
-                    
+
                     self.datastoreManager = [[CDTDatastoreManager alloc] initWithDirectory:[storeURL path] error:&error];
                     if(error){
                         NSLog(@"DBCreationFailure: Could not create CDTDatastoreManager with directory %@.", documentsDir);
@@ -171,7 +172,7 @@
                         [alert show];
                         return;
                     }
-                    
+
                     //create a local data store. Encrypt the local store if the setting is enabled
                     if(encryptionEnabled){
                         //Initalize the key provider
@@ -182,10 +183,10 @@
                     }else{
                         self.datastore = [self.datastoreManager datastoreNamed:self.dbName error:&error];
                     }
-                    
+
                     // Setup required indexes for Query
                     [self.datastore ensureIndexed:@[DATATYPE_FIELD] withName:@"datatypeindex"];
-                    
+
                     if (error) {
                         NSLog(@"DBCreationFailure: Could not create DB with name %@.", self.dbName);
                         if(encryptionEnabled){
@@ -196,18 +197,18 @@
                     else{
                         NSLog(@"Local data store created successfully");
                     }
-                    
-                    
-                    
+
+
+
                     //create a replication push and pull objects using the local datastore and remote datastore url
                     self.replicatorFactory = [[CDTReplicatorFactory alloc]initWithDatastoreManager:self.datastoreManager];
-                    
+
                     self.pullReplication = [CDTPullReplication replicationWithSource:self.remotedatastoreurl target:self.datastore];
                     [self.pullReplication addInterceptor:self.cloudantHttpInterceptor];
-                    
+
                     self.pushReplication = [CDTPushReplication replicationWithSource:self.datastore target:self.remotedatastoreurl];
                     [self.pushReplication addInterceptor:self.cloudantHttpInterceptor];
-                    
+
                     [self pullItems];
                 }
             }];
@@ -237,14 +238,14 @@
 {
     NSString *enrollUrlString = [NSString stringWithFormat:@"%@/enroll", self.bluelistProxyAdapterURL];
     NSURL *enrollUrl = [NSURL URLWithString:enrollUrlString];
-    
+
     WLResourceRequest *request = [WLResourceRequest requestWithURL:enrollUrl method:@"PUT" timeout:60];
     [request sendWithCompletionHandler:^(WLResponse *response, NSError *error) {
         if(error){
             completionHandler(nil, error);
             return;
         }
-        
+
         NSInteger httpStatus = response.status;
         if(httpStatus != 200){
             dispatch_sync(dispatch_get_main_queue(), ^{
@@ -252,7 +253,7 @@
             });
             return;
         }
-        
+
         NSData *data = response.responseData;
         if(data){
             NSError *jsonError = nil;
@@ -264,13 +265,13 @@
                 NSString *cloudantProtocol = cloudantAccess[@"protocol"];
                 self.dbName = jsonObject[@"database"];
                 NSString *sessionCookie = jsonObject[@"sessionCookie"];
-                
-                
+
+
                 self.remotedatastoreurl = [NSURL URLWithString: [NSString stringWithFormat:@"%@://%@:%@/%@", cloudantProtocol, cloudantHost, cloudantPort, self.dbName]];
-                
+
                 NSString *refreshUrlString = [NSString stringWithFormat:@"%@/sessioncookie", self.bluelistProxyAdapterURL];
                 self.cloudantHttpInterceptor = [[CloudantHttpInterceptor alloc]initWithSessionCookie:sessionCookie refreshUrl:[NSURL URLWithString:refreshUrlString]];
-                
+
                 completionHandler(self.dbName, nil);
             }else{
                 completionHandler(nil, jsonError);
@@ -284,18 +285,18 @@
 - (void)listItems: (void(^)(void)) cb
 {
     NSLog(@"listItems called");
-    
+
     CDTQResultSet *resultSet = [self.datastore find:@{DATATYPE_FIELD : DATATYPE_VALUE}];
     NSMutableArray *results = [NSMutableArray array];
-    
+
     [resultSet enumerateObjectsUsingBlock:^(CDTDocumentRevision *rev, NSUInteger idx, BOOL *stop) {
         if(!rev.deleted)
             [results addObject:rev];
     }];
-    
+
     self.itemList = results;
     [self reloadLocalTableData];
-    
+
     if (cb) {
         cb();
     }
@@ -306,7 +307,7 @@
     //save will perform a create because the item object does not exist yet in the DB.
     NSError *error = nil;
     [self.datastore createDocumentFromRevision:item error:&error];
-    
+
     if (error) {
         NSLog(@"createItem failed with error: %@", error);
     } else {
@@ -318,7 +319,7 @@
     //save will perform a create because the CDTDocumentRevision already exists.
     NSError *error = nil;
     [self.datastore updateDocumentFromRevision:item error:&error];
-    
+
     if (error) {
         NSLog(@"update failed with error: %@", error);
     } else {
@@ -329,7 +330,7 @@
 {
     NSError *error = nil;
     [self.datastore deleteDocumentFromRevision:item error:&error];
-    
+
     if (error != nil) {
         NSLog(@"deleteItem failed with error: %@", error);
     } else {
@@ -347,18 +348,18 @@
     if(error != nil){
         NSLog(@"Error creating oneWay pullReplicator %@", error);
     }
-    
+
     self.pullReplicator.delegate = self;
     self.doingPullReplication = YES;
     self.refreshControl.attributedTitle = [[NSAttributedString alloc]initWithString:@"Pulling Items from Cloudant"];
-    
+
     error = nil;
     NSLog(@"Replicating data with NoSQL Database on the cloud");
     [self.pullReplicator startWithError:&error];
     if(error != nil){
         NSLog(@"error starting pull replicator: %@", error);
     }
-    
+
 }
 // Replicate data & logs from the local to remote
 - (void)pushItems
@@ -368,12 +369,12 @@
     if(error != nil){
         NSLog(@"error creating one way push replicator: %@", error);
     }
-    
+
     self.pushReplicator.delegate = self;
-    
+
     self.doingPullReplication = NO;
     self.refreshControl.attributedTitle = [[NSAttributedString alloc]initWithString:@"Pushing Items from Cloudant"];
-    
+
     error = nil;
     [self.pushReplicator startWithError:&error];
     if(error != nil){
@@ -415,7 +416,7 @@
             self.settingsButton.enabled = true;
         }];
     }
-    
+
 }
 
 /**
@@ -428,7 +429,7 @@
     [self listItems:^{
         [self.refreshControl performSelectorOnMainThread:@selector(endRefreshing) withObject:nil waitUntilDone:YES];
     }];
-    
+
 }
 
 #pragma mark - Table view data source
@@ -491,7 +492,7 @@
     NSInteger selectedPriority;
     NSInteger newPriority = 0;
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
-    
+
     CDTMutableDocumentRevision *item = [self.filteredListItems[indexPath.row] mutableCopy];
     selectedPriority = [item.body[PRIORITY_FIELD] integerValue];
     newPriority = [self getNextPriority:selectedPriority];
@@ -517,9 +518,9 @@
 }
 
 -(UIImage*) getPriorityImageForPriority:(NSInteger)priority{
-    
+
     UIImage* resultImage;
-    
+
     switch (priority) {
         case 2:
             resultImage = self.highImage;
@@ -527,7 +528,7 @@
         case 1:
             resultImage = self.mediumImage;
             break;
-            
+
         default:
             resultImage = self.lowImage;
             break;
@@ -550,7 +551,7 @@
 
 -(void) filterContentForPriority:(NSString *)scope {
     NSInteger priority = [self getPriorityForString:scope];
-    
+
     if(priority == 1 || priority == 2){
         //filter base on priority
         NSIndexSet *matchSet = [self.itemList indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
@@ -606,7 +607,7 @@
     [self.filteredListItems sortUsingComparator:^NSComparisonResult(CDTDocumentRevision* item1, CDTDocumentRevision* item2) {
         return [item1.body[NAME_FIELD] caseInsensitiveCompare:item2.body[NAME_FIELD]];
     }];
-    
+
     [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
 }
 

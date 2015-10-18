@@ -1,16 +1,18 @@
-// Copyright 2014, 2015 IBM Corp. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/**
+* Copyright 2015 IBM Corp.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 #import "CloudantHttpInterceptor.h"
 #import <IBMMobileFirstPlatformFoundation/IBMMobileFirstPlatformFoundation.h>
@@ -41,12 +43,12 @@
     if(![context.request valueForHTTPHeaderField:COOKIE_HEADER]){
         if(!self.sessionCookie){
             dispatch_semaphore_t sessionCookieSemaphore = dispatch_semaphore_create(0);
-            
+
             [self obtainSessionCookie:^(NSError *error) {
                 [context.request addValue:self.sessionCookie forHTTPHeaderField:COOKIE_HEADER];
                 dispatch_semaphore_signal(sessionCookieSemaphore);
             }];
-            
+
             dispatch_semaphore_wait(sessionCookieSemaphore, DISPATCH_TIME_FOREVER);
         }else{
             [context.request addValue:self.sessionCookie forHTTPHeaderField:COOKIE_HEADER];
@@ -59,13 +61,13 @@
 {
     if(context.response.statusCode == 401 || context.response.statusCode == 403){
         dispatch_semaphore_t sessionCookieSemaphore = dispatch_semaphore_create(0);
-        
+
         [self obtainSessionCookie:^(NSError *error) {
             [context.request addValue:self.sessionCookie forHTTPHeaderField:COOKIE_HEADER];
             context.shouldRetry = YES;
             dispatch_semaphore_signal(sessionCookieSemaphore);
         }];
-        
+
         dispatch_semaphore_wait(sessionCookieSemaphore, DISPATCH_TIME_FOREVER);
     }
     return context;
@@ -84,13 +86,13 @@
                     completionHandler(error);
                     return;
                 }
-                
+
                 NSInteger httpStatus = ((NSHTTPURLResponse*)response).statusCode;
                 if(httpStatus != 200){
                     completionHandler([NSError errorWithDomain:@"BlueList" code:42 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Invalid HTTP Status %ld.  Check NodeJS application on Bluemix", httpStatus]}]);
                     return;
                 }
-                
+
                 NSData *data = response.responseData;
                 if(data){
                     NSError *jsonError = nil;
