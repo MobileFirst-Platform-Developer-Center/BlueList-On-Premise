@@ -15,34 +15,34 @@ limitations under the License.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/LaunchScreen"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/blue"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.ibm.imf_bluelist.MainActivity"
-    android:id="@+id/LaunchScreen">
+    tools:context="com.ibm.imf_bluelist.MainActivity">
 
     <ImageView
+        android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:src="@mipmap/bluemix_logo"
-        android:contentDescription="@string/BluemixLogo" />
+        android:layout_centerVertical="true"
+        android:contentDescription="@string/BluemixLogo"
+        android:src="@mipmap/bluemix_logo" />
 
     <TextView
+        android:id="@+id/CopyrightText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/CopyrightText"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:text="@string/Copyright"
         android:textColor="@color/black"
-        android:textStyle="bold"
         android:textSize="15sp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:textStyle="bold" />
 
 </RelativeLayout>

@@ -15,9 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:top="-6dp" android:left="-6dp" android:right="-6dp">
+    <item
+        android:left="-6dp"
+        android:right="-6dp"
+        android:top="-6dp">
         <shape android:shape="rectangle">
-            <stroke android:color="@color/blue" android:width="5dp"/>
+            <stroke
+                android:width="5dp"
+                android:color="@color/blue" />
         </shape>
     </item>
 </layer-list>

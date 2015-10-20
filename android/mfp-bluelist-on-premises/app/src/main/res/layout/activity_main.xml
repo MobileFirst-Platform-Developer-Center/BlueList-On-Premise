@@ -14,43 +14,44 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/MainActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_container"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:background="@color/white"
-        android:id="@+id/swipe_container">
+        android:background="@color/white">
+
         <ListView
-            android:scrollingCache="false"
+            android:id="@+id/listView"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:id="@+id/listView"
-            android:layout_gravity="center_horizontal|bottom"/>
+            android:layout_gravity="center_horizontal|bottom"
+            android:scrollingCache="false" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <ImageButton
-        style="@style/PlusButton"
         android:id="@+id/fab"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
+        style="@style/PlusButton"
         android:layout_width="@dimen/fab_size"
         android:layout_height="@dimen/fab_size"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
         android:layout_gravity="bottom|right"
-        android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
         android:background="@drawable/circle"
-        android:src="@mipmap/plusbutton"
         android:elevation="4dp"
         android:onClick="addTodo"
-        />
+        android:src="@mipmap/plusbutton" />
 
 
 </RelativeLayout>

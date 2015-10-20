@@ -27,5 +27,7 @@ limitations under the License.
     <string name="high">High</string>
     <string name="Plus">+</string>
     <string name="todo">New Todo</string>
+    <string name="hint_new_todo">New Todo</string>
+    <string name="button_done">Done</string>
 
-    </resources>
+</resources>

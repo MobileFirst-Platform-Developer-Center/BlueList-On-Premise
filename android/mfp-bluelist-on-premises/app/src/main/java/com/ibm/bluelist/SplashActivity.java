@@ -1,12 +1,12 @@
 /**
  * Copyright 2015 IBM Corp.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,14 +33,14 @@ import com.google.common.eventbus.Subscribe;
 public class SplashActivity extends Activity {
     private static final String TAG = SplashActivity.class.getCanonicalName();
 
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_launch_screen);
     }
 
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
 
         // Initialize application components
@@ -50,7 +50,7 @@ public class SplashActivity extends Activity {
 
         // Register a listener for pull replication
         final Replicator pullReplicator = BlueListApplication.getInstance().getPullReplicator();
-        pullReplicator.getEventBus().register(new Object(){
+        pullReplicator.getEventBus().register(new Object() {
 
             // Launch MainActivity when replication completes
             @Subscribe

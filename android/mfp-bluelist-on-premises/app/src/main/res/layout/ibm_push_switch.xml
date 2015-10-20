@@ -17,14 +17,14 @@ limitations under the License.
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:orientation="horizontal">
 
     <Switch
-        android:textColor="@color/white"
         android:id="@+id/switchForIBMPush"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" />
+        android:layout_centerVertical="true"
+        android:textColor="@color/white" />
 
 </RelativeLayout>

@@ -1,12 +1,12 @@
 /**
  * Copyright 2015 IBM Corp.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * An an adapter for mapping TodoItems to ListView rows
  */
-public class TodoItemAdapter extends BaseAdapter implements ListAdapter{
+public class TodoItemAdapter extends BaseAdapter implements ListAdapter {
 
     private static final String TAG = TodoItemAdapter.class.getCanonicalName();
     private List<DocumentRevision> mTodoItems;
@@ -85,7 +85,7 @@ public class TodoItemAdapter extends BaseAdapter implements ListAdapter{
         DocumentRevision todoItem = mTodoItems.get(position);
 
         // Set TodoItem text
-        String name = (String)todoItem.getBody().asMap().get(BlueListApplication.TODO_ITEM_NAME_KEY);
+        String name = (String) todoItem.getBody().asMap().get(BlueListApplication.TODO_ITEM_NAME_KEY);
         text.setText(name);
         text.setTypeface(BlueListApplication.getInstance().getTypeFace());
 
@@ -97,7 +97,7 @@ public class TodoItemAdapter extends BaseAdapter implements ListAdapter{
     }
 
     private int getPriorityImageResourceId(int priority) {
-        switch (priority){
+        switch (priority) {
             case 1:
                 return R.mipmap.medium;
             case 2:

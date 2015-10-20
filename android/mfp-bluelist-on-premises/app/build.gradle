@@ -41,4 +41,5 @@ dependencies {
     compile 'com.cloudant:cloudant-sync-datastore-core:0.13.4'
     compile 'com.cloudant:cloudant-sync-datastore-android:0.13.4'
     compile 'com.cloudant:cloudant-sync-datastore-android-encryption:0.13.4'
+    compile 'com.loopj.android:android-async-http:1.4.6'
 }

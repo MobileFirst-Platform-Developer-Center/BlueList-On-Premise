@@ -41,8 +41,7 @@ limitations under the License.
         <activity
             android:name="com.ibm.bluelist.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/IBMCustomTheme">
-        </activity>
+            android:theme="@style/IBMCustomTheme" />
 
     </application>
 

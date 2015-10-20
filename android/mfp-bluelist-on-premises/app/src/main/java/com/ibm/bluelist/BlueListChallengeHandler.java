@@ -1,12 +1,12 @@
 /**
  * Copyright 2015 IBM Corp.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,8 @@ public class BlueListChallengeHandler extends ChallengeHandler {
     public String ScopeRealm;
 
     public BlueListChallengeHandler(String realm) {
-        super(realm); Log.i("CHALLENGE_HANDLER", "ctor(): realm = " + realm);
+        super(realm);
+        Log.i("CHALLENGE_HANDLER", "ctor(): realm = " + realm);
     }
 
     /**
@@ -46,10 +47,10 @@ public class BlueListChallengeHandler extends ChallengeHandler {
     @Override
     public boolean isCustomResponse(WLResponse response) {
         try {
-            if(response!= null &&
-                    response.getResponseJSON()!=null &&
+            if (response != null &&
+                    response.getResponseJSON() != null &&
                     !response.getResponseJSON().isNull("authRequired") &&
-                    response.getResponseJSON().getBoolean("authRequired")){
+                    response.getResponseJSON().getBoolean("authRequired")) {
                 return true;
             }
         } catch (JSONException e) {
@@ -66,8 +67,8 @@ public class BlueListChallengeHandler extends ChallengeHandler {
      */
     @Override
     public void handleChallenge(WLResponse wlResponse) {
-        Object[] parameters = new Object[]{UserName,UserPassword};
-        WLProcedureInvocationData invocationData = new  WLProcedureInvocationData("CloudantAuthenticationAdapter", "submitAuthentication");
+        Object[] parameters = new Object[]{UserName, UserPassword};
+        WLProcedureInvocationData invocationData = new WLProcedureInvocationData("CloudantAuthenticationAdapter", "submitAuthentication");
         invocationData.setParameters(parameters);
         WLRequestOptions options = new WLRequestOptions();
         options.setTimeout(30000);
@@ -75,8 +76,12 @@ public class BlueListChallengeHandler extends ChallengeHandler {
     }
 
     @Override
-    public void onSuccess(WLResponse wlResponse) { submitSuccess(wlResponse); }
+    public void onSuccess(WLResponse wlResponse) {
+        submitSuccess(wlResponse);
+    }
 
     @Override
-    public void onFailure(WLFailResponse wlFailResponse) { submitFailure(wlFailResponse); }
+    public void onFailure(WLFailResponse wlFailResponse) {
+        submitFailure(wlFailResponse);
+    }
 }
