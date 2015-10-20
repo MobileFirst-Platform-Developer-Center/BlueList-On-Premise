@@ -34,7 +34,7 @@ You will need to open BlueListProxy/server/conf/worklight.properties and configu
 Edit the server/conf/worklight.properties file.  Change the CloudantProtocol, CloudantHost, CloudantPort, CloudantUsername, and CloudantPassword values to match your IBM MobileFirst Platform Cloudant Data Layer Local Edition access information.
 
 Complete the following calls in the BlueListProxy directory:
-- `$> mfp create-server`
+- `$> mfp server create`
 - `$> mfp start`
 - `$> mfp console`
 
