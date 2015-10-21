@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-public class dBlueListApplication extends Application {
+public class BlueListApplication extends Application {
 
     private static final String TAG = BlueListApplication.class.getCanonicalName();
     private static final String TODO_ITEM_INDEX_NAME = "todoItem_index";
